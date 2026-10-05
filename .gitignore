@@ -11,3 +11,7 @@ runs/
 # วิดีโอ + ภาพดิบ 1,322 ใบ (~749MB) ห้าม push — เก็บ local / external drive
 raw_images/
 *.mp4
+
+# pseudo-labels ดิบจากสคริปต์ (~152MB, ยังไม่ผ่าน review) — เก็บ local แล้วค่อย push ชุดที่คัดแล้ว
+pseudo/
+pseudo_for_roboflow.zip

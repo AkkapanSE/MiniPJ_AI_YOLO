@@ -132,3 +132,24 @@ MiniPJ_AI_YOLO/
 ## 6. คำตอบสั้นๆ: ตอนนี้ถึงขั้นไหน?
 
 > **ทำถึงขั้น “Label + Export YOLO Dataset บน Roboflow เสร็จ (480 ภาพ 6 คลาส, train 341 / valid 93 / test 46) พร้อมเทรน local แล้ว (env ครบ)” คิดเป็น ~70% — ขั้นต่อไปคือ “รันเทรน YOLO + วัด mAP + เทียบผล Roboflow Train”**
+
+---
+
+## 7. รอบ 5 ต.ค. 2026 (เย็น): เทรน baseline + pseudo-label + เทรนรอบ 2 ✅
+
+### 7.1 Baseline (`runs/detect/pathongko_mixed_model`, yolov8n 50e, `02-train/02-train.py`)
+- Val (92 ภาพ): P 0.819 / R 0.822 / **mAP50 0.844** / mAP50-95 0.797
+- อ่อนสุด `street_burnt_defect` 0.591 → ที่มาของแผนเพิ่มข้อมูล
+
+### 7.2 Pseudo-label ภาพดิบ (`03-pseudolabel/pseudo_label.py`, best.pt conf 0.5)
+- ได้ label ร่าง **524 ภาพ** → review บน Roboflow → export **DTPG v2 (`mixed2/`)**
+- ตัดภาพซ้ำ mixed 480 + ภาพเปล่า 318 ใบทิ้ง (local only, gitignore)
+
+### 7.3 รอบ 2 (`02-train/02-train-mixed2.py`, yolov8n **80e**, `cls=1.0` + `copy_paste=0.3` + `mixup=0.2`)
+- `mixed2/`: train **713** (+372) / valid 93 / test 46 (valid/test ชุดเดิม เทียบ baseline ได้ตรง)
+- Val: P 0.875 / R 0.832 / **mAP50 0.895** / mAP50-95 0.831 ✅ ผ่านเป้า 0.85
+- Test (`split=test`): P 0.93 / R 0.897 / **mAP50 0.935**
+- `street_burnt_defect`: 0.591 → **0.767** (+0.176) / brand ทั้งคู่ 0.995
+- จุดอ่อนคงเหลือ: `street_burnt_good` recall 0.667 (กล่อง train แค่ 47)
+- Weights ใช้งาน: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (local only, gitignore)
+- ภาพ demo predict 46 ใบ: `runs/detect/runs/detect/predict_test/` (local only)
