@@ -23,15 +23,19 @@ if __name__ == "__main__":
     print(f"🔍 ทดสอบโมเดล: {WEIGHTS.name} กับ {source}")
 
     model = YOLO(str(WEIGHTS))
-    results = model.predict(
+    # stream=True: ประมวลผลทีละภาพ ไม่เก็บผลทั้งหมดไว้ในแรม (กันแรมเต็ม)
+    n_img, n_box = 0, 0
+    for r in model.predict(
         source=source,
         conf=0.5,          # มั่นใจ >= 50% ถึงตีกรอบ
         imgsz=640,
         save=True,         # เซฟภาพผลลัพธ์
         save_txt=True,     # เซฟ label ที่ predict ได้
+        stream=True,       # สตรีมทีละภาพ ประหยัดแรม
         project=str(BASE / "runs" / "detect"),
         name="predict_demo",
-    )
+    ):
+        n_img += 1
+        n_box += len(r.boxes)
 
-    n_box = sum(len(r.boxes) for r in results)
-    print(f"✅ เสร็จ: {len(results)} ภาพ, เจอ {n_box} กล่อง → runs/detect/predict_demo/")
+    print(f"✅ เสร็จ: {n_img} ภาพ, เจอ {n_box} กล่อง → runs/detect/predict_demo/")

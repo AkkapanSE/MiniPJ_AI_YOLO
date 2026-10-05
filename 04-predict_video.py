@@ -20,13 +20,18 @@ if __name__ == "__main__":
     print(f"🎬 ทดสอบวิดีโอ: {source}")
 
     model = YOLO(str(WEIGHTS))
-    results = model.predict(
+    # stream=True: ประมวลผลทีละเฟรม ไม่เก็บผลทั้งคลิปไว้ในแรม (กันแรมเต็ม)
+    n_frames, n_box = 0, 0
+    for r in model.predict(
         source=source,
         conf=0.5,          # มั่นใจ >= 50% ถึงตีกรอบ
         imgsz=640,
         save=True,         # เซฟวิดีโอผลลัพธ์
+        stream=True,       # สตรีมทีละเฟรม ประหยัดแรม
         project=str(BASE / "runs" / "detect"),
         name="predict_video_demo",
-    )
+    ):
+        n_frames += 1
+        n_box += len(r.boxes)
 
-    print(f"✅ เสร็จ: ประมวลผล {len(results)} เฟรม → runs/detect/predict_video_demo/")
+    print(f"✅ เสร็จ: ประมวลผล {n_frames} เฟรม เจอ {n_box} กล่อง → runs/detect/predict_video_demo/")
