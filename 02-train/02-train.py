@@ -1,19 +1,25 @@
 from ultralytics import YOLO
 
 if __name__ == '__main__':
-    # 1. โหลด Pre-trained Model (ใช้ yolov8n.pt เป็นฐานเริ่มต้น)
+    # เทรนรอบ 2 บน mixed2 (train 713 ภาพ, เพิ่มจาก pseudo-label ผ่าน review บน Roboflow)
+    # ชดเชยคลาสน้อย (street_burnt_good 47 / brand_golden_defect 51 กล่อง เทียบ street_golden_defect 298):
+    #  - cls=1.0       เพิ่มน้ำหนัก classification loss (default 0.5)
+    #  - copy_paste/mixup  สังเคราะห์บริบทให้วัตถุคลาสน้อยเห็นบ่อยขึ้น
     model = YOLO('yolov8n.pt')
 
-    # 2. สั่งเริ่มเทรนโมเดลด้วย Dataset รวมในโฟลเดอร์ mixed
-    print("🚀 เริ่มต้นการเทรนโมเดลปาท่องโก๋ (Mixed Dataset)...")
+    print("🚀 เทรนรอบ 2: mixed2 + ชดเชย class imbalance (80 epochs)...")
     results = model.train(
-        data='mixed/data_local.yaml',  # path สัมบูรณ์ (data.yaml เดิมชี้ ../train ผิดที่)
-        epochs=50,                   # จำนวนรอบการเทรน
-        imgsz=640,                   # ขนาดรูปภาพมาตรฐาน
-        batch=16,                    # ขนาด Batch size (ถ้า VRAM ไม่พอ ปรับลดเป็น 8 ได้)
-        device=0,                    # ใช้ GPU การ์ดใบที่ 0 (ถ้าไม่มี GPU ให้ตัดบรรทัดนี้ออก)
-        workers=4,                   # จำนวน worker สำหรับโหลดข้อมูล (ปรับลดเป็น 2 หรือ 0 ได้ถ้าเจอปัญหาบน Windows)
-        name='pathongko_mixed_model' # ชื่อโฟลเดอร์ที่จะใช้บันทึกผลลัพธ์ใน runs/detect/
+        data='mixed2/data_local.yaml',  # path สัมบูรณ์ (data.yaml เดิมชี้ ../train ผิดที่)
+        epochs=80,
+        imgsz=640,
+        batch=16,
+        device=0,                    # GPU ใบที่ 0
+        workers=4,
+        patience=20,                 # early stopping ถ้าไม่ดีขึ้น 20 epochs
+        cls=1.0,                     # เน้น classification loss ชดเชยคลาสน้อย
+        copy_paste=0.3,              # สุ่มแปะวัตถุเพิ่ม
+        mixup=0.2,                   # ผสมภาพเพิ่มความหลากหลาย
+        name='pathongko_mixed2_80e'  # ผลใน runs/detect/
     )
 
-    print("🎉 เทรนโมเดลเสร็จสิ้นเรียบร้อยแล้ว!")
+    print("🎉 เทรนรอบ 2 เสร็จสิ้น!")

@@ -2,6 +2,7 @@
 .env/
 __pycache__/
 *.pyc
+*.cache
 
 # YOLO outputs & weights
 runs/
@@ -15,3 +16,4 @@ raw_images/
 # pseudo-labels ดิบจากสคริปต์ (~152MB, ยังไม่ผ่าน review) — เก็บ local แล้วค่อย push ชุดที่คัดแล้ว
 pseudo/
 pseudo_for_roboflow.zip
+00001/

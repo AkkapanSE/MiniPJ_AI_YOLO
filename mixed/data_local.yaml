@@ -1,5 +1,0 @@
-train: C:/Users/chano/MiniPJ_AI_YOLO/mixed/train/images
-val: C:/Users/chano/MiniPJ_AI_YOLO/mixed/valid/images
-test: C:/Users/chano/MiniPJ_AI_YOLO/mixed/test/images
-nc: 6
-names: ['brand_golden_defect', 'brand_golden_good', 'street_burnt_defect', 'street_burnt_good', 'street_golden_defect', 'street_golden_good']
