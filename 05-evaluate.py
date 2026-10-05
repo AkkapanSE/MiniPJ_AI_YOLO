@@ -95,55 +95,65 @@ def build_confusion_matrix(model, names: dict) -> np.ndarray:
     return cm
 
 
-def show_dashboard(cm: np.ndarray, labels: list, curve_pngs: list, save_path: Path, title: str):
-    """แดชบอร์ด matplotlib หน้าต่างเดียว: heatmap custom (วาดเอง) + curves (ultralytics)"""
+def center_window():
+    """จัดหน้าต่างกราฟไว้กลางจอ (รองรับทั้ง Tk / Qt)"""
+    import matplotlib.pyplot as plt
+
+    try:
+        win = plt.get_current_fig_manager().window
+        win.state("zoomed")  # ขยายก่อนกันภาพล้น (TkAgg)
+        win.eval("tk::PlaceWindow . center")
+    except Exception:
+        try:
+            win = plt.get_current_fig_manager().window
+            win.showMaximized()
+        except Exception:
+            pass
+
+
+def show_one_by_one(cm: np.ndarray, labels: list, curve_pngs: list,
+                    save_dir: Path, title_base: str):
+    """โชว์ทีละกราฟ กลางจอ: heatmap custom (วาดเอง) 2 ภาพ + curves ทีละภาพ"""
     import matplotlib.pyplot as plt
     from matplotlib.image import imread
 
     row_sum = cm.sum(axis=1, keepdims=True)
     norm = np.divide(cm, row_sum, out=np.zeros_like(cm, dtype=float),
                      where=row_sum != 0)
-    # เตรียม 6 ช่อง: CM จำนวนดิบ / CM % / F1 / PR / results / CM ultralytics
-    cells = [("custom-count", None), ("custom-norm", None)]
-    cells += [("png", p) for p in curve_pngs[:4]]
+    saved = []
 
-    fig, axes = plt.subplots(2, 3, figsize=(12.8, 7.2))
-    fig.suptitle(title, fontsize=13, y=0.98)
-    for ax, (kind, payload) in zip(axes.flat, cells):
-        if kind == "png" and payload is not None:
-            ax.imshow(imread(payload), aspect="equal")
-            ax.set_title(Path(payload).name, fontsize=10, pad=4)
-            ax.axis("off")
-        elif kind in ("custom-count", "custom-norm"):
-            mat = cm if kind == "custom-count" else norm
-            fmt = "d" if kind == "custom-count" else ".0%"
-            ax.imshow(mat, cmap="Blues", aspect="equal")
-            ax.set_xticks(range(len(labels)), labels, rotation=30, ha="right", fontsize=8)
-            ax.set_yticks(range(len(labels)), labels, fontsize=8)
-            ax.set_xlabel("Predicted", fontsize=9)
-            ax.set_ylabel("True", fontsize=9)
-            ax.set_title("CM จำนวนดิบ" if kind == "custom-count" else "CM % รายแถว",
-                         fontsize=10, pad=4)
-            thresh = mat.max() / 2
-            for i in range(len(labels)):
-                for j in range(len(labels)):
-                    ax.text(j, i, f"{mat[i, j]:{fmt}}", ha="center", va="center",
-                            fontsize=8, color="white" if mat[i, j] > thresh else "black")
-        else:
-            ax.axis("off")
-    for ax in axes.flat[len(cells):]:
+    def heatmap(mat, fmt, title, fname):
+        fig, ax = plt.subplots(figsize=(9.6, 7.2))
+        fig.suptitle(f"{title_base}\n{title}", fontsize=12, y=0.98)
+        ax.imshow(mat, cmap="Blues", aspect="equal")
+        ax.set_xticks(range(len(labels)), labels, rotation=30, ha="right", fontsize=9)
+        ax.set_yticks(range(len(labels)), labels, fontsize=9)
+        ax.set_xlabel("Predicted", fontsize=10)
+        ax.set_ylabel("True", fontsize=10)
+        thresh = mat.max() / 2
+        for i in range(len(labels)):
+            for j in range(len(labels)):
+                ax.text(j, i, f"{mat[i, j]:{fmt}}", ha="center", va="center",
+                        fontsize=10, color="white" if mat[i, j] > thresh else "black")
+        fig.tight_layout(rect=[0, 0.02, 1, 0.90])
+        fig.savefig(save_dir / fname, dpi=150)
+        saved.append(fname)
+        center_window()
+        plt.show()
+
+    heatmap(cm, "d", "Confusion Matrix — จำนวนดิบ", "confusion_matrix_custom.png")
+    heatmap(norm, ".0%", "Confusion Matrix — % รายแถว", "confusion_matrix_norm.png")
+
+    for p in curve_pngs:
+        fig, ax = plt.subplots(figsize=(9.6, 7.2))
+        fig.suptitle(f"{title_base}\n{Path(p).name}", fontsize=12, y=0.98)
+        ax.imshow(imread(p), aspect="equal")
         ax.axis("off")
-    fig.tight_layout(rect=[0, 0.02, 1, 0.93])
-    fig.savefig(save_path, dpi=150)
-    print(f"แดชบอร์ดรวม: {save_path}")
-    try:
-        plt.get_current_fig_manager().window.state("zoomed")  # TkAgg
-    except Exception:
-        try:
-            plt.get_current_fig_manager().window.showMaximized()  # Qt
-        except Exception:
-            pass
-    plt.show()
+        fig.tight_layout(rect=[0, 0.02, 1, 0.90])
+        center_window()
+        plt.show()
+
+    print(f"เซฟ heatmap custom: {', '.join(saved)} (ใน {save_dir})")
 
 
 if __name__ == "__main__":
@@ -186,7 +196,6 @@ if __name__ == "__main__":
               "results.png", "confusion_matrix.png"]
     curve_paths = [str(m.save_dir / p) for p in curves if (m.save_dir / p).exists()]
     print(f"กราฟต้นฉบับเซฟที่: {m.save_dir}")
-    show_dashboard(cm, labels, curve_paths,
-                   m.save_dir / "evaluate_summary.png",
-                   f"Evaluate {WEIGHTS.parent.parent.name} "
-                   f"(test mAP50={b.map50:.3f}, F1={mean_f1:.3f})")
+    show_one_by_one(cm, labels, curve_paths, m.save_dir,
+                    f"Evaluate {WEIGHTS.parent.parent.name} "
+                    f"(test mAP50={b.map50:.3f}, F1={mean_f1:.3f})")
