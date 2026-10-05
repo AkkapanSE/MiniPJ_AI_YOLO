@@ -131,7 +131,10 @@ MiniPJ_AI_YOLO/
 
 ## 6. คำตอบสั้นๆ: ตอนนี้ถึงขั้นไหน?
 
-> **ทำถึงขั้น “Label + Export YOLO Dataset บน Roboflow เสร็จ (480 ภาพ 6 คลาส, train 341 / valid 93 / test 46) พร้อมเทรน local แล้ว (env ครบ)” คิดเป็น ~70% — ขั้นต่อไปคือ “รันเทรน YOLO + วัด mAP + เทียบผล Roboflow Train”**
+> **เทรนรอบ 3 เสร็จ (label แก้แล้วครบ 100%): train 713 / valid 93 / test 46,
+> val mAP50 0.895 / test 0.879 ผ่านเป้า 0.85 — โมเดลพร้อมใช้ที่
+> `runs/detect/pathongko_mixed3_fixed/weights/best.pt` คิดเป็น ~95%
+> (เหลือแค่เก็บตัวอย่างคลาสน้อยเพิ่มถ้าจะดันต่อ)**
 
 ---
 
@@ -151,10 +154,11 @@ MiniPJ_AI_YOLO/
 ### 7.3 รอบ 2 (`02-train/02-train.py` ฉบับปัจจุบัน, yolov8n **80e**, `cls=1.0` + `copy_paste=0.3` + `mixup=0.2`)
 - `mixed2/`: train **713** (+372) / valid 93 / test 46 (valid/test ชุดเดิม เทียบ baseline ได้ตรง)
 - Val: P 0.875 / R 0.832 / **mAP50 0.895** / mAP50-95 0.831 ✅ ผ่านเป้า 0.85
-- Test (`split=test`): P 0.93 / R 0.897 / **mAP50 0.935**
+- Test (`split=test`): P 0.93 / R 0.897 / **mAP50 0.935** ⚠️ เลขนี้วัดบน label ผสม
+  (polygon โดน ultralytics ทิ้งเงียบๆ เหลือ 60 กล่อง — ดู 7.4, ค่าจริง 0.867)
 - `street_burnt_defect`: 0.591 → **0.767** (+0.176) / brand ทั้งคู่ 0.995
 - จุดอ่อนคงเหลือ: `street_burnt_good` recall 0.667 (กล่อง train แค่ 47)
-- Weights ใช้งาน: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (local only, gitignore)
+- Weights รอบ 2: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (superseded — ปัจจุบันใช้รอบ 3)
 - ภาพ demo predict 46 ใบ: `runs/detect/runs/detect/predict_test/` (local only)
 
 ### 7.4 แก้บั๊ก label ผสม bbox + polygon (สำคัญ)
