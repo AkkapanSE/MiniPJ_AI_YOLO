@@ -1,16 +1,14 @@
 from ultralytics import YOLO
 
 if __name__ == '__main__':
-    # เทรนรอบ 3 บน mixed2 หลังแก้บั๊ก label (polygon→bbox ครบ 100%, train 713 ภาพ)
-    # ชดเชยคลาสน้อย (street_burnt_good 47 / brand_golden_defect 51 กล่อง เทียบ street_golden_defect 298):
-    #  - cls=1.0       เพิ่มน้ำหนัก classification loss (default 0.5)
-    #  - copy_paste/mixup  สังเคราะห์บริบทให้วัตถุคลาสน้อยเห็นบ่อยขึ้น
-    model = YOLO('yolov8n.pt')
+    # เทรนรอบ 5 บน mixed2_os (oversample คลาส 3/0/2: train 713→1164, สัดส่วน 6.3:1→2.3:1)
+    # เป้าหมาย: ดัน street_burnt_defect (test R 0.56) + street_burnt_good ให้สำเร็จ
+    model = YOLO('yolov8s.pt')
 
-    print("🚀 เทรนรอบ 3: mixed2 label แก้แล้ว + ชดเชย class imbalance (80 epochs)...")
+    print("🚀 เทรนรอบ 5: yolov8s + oversample + ชดเชย class imbalance (100 epochs)...")
     results = model.train(
-        data='mixed2/data_local.yaml',  # path สัมบูรณ์ (data.yaml เดิมชี้ ../train ผิดที่)
-        epochs=80,
+        data='mixed2_os/data_local.yaml',  # train oversample, valid/test ชุดเดิม
+        epochs=100,
         imgsz=640,
         batch=16,
         device=0,                    # GPU ใบที่ 0
@@ -19,7 +17,7 @@ if __name__ == '__main__':
         cls=1.0,                     # เน้น classification loss ชดเชยคลาสน้อย
         copy_paste=0.3,              # สุ่มแปะวัตถุเพิ่ม
         mixup=0.2,                   # ผสมภาพเพิ่มความหลากหลาย
-        name='pathongko_mixed3_fixed'  # ผลใน runs/detect/ (แยกจากรอบ 2)
+        name='pathongko_mixed5_os'  # ผลใน runs/detect/ (แยกจากรอบ 4)
     )
 
-    print("🎉 เทรนรอบ 3 เสร็จสิ้น!")
+    print("🎉 เทรนรอบ 5 เสร็จสิ้น!")
