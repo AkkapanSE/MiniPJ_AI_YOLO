@@ -1,0 +1,13 @@
+# Python / venv
+.env/
+__pycache__/
+*.pyc
+
+# YOLO outputs & weights
+runs/
+*.pt
+*.onnx
+
+# วิดีโอ + ภาพดิบ 1,322 ใบ (~749MB) ห้าม push — เก็บ local / external drive
+raw_images/
+*.mp4
