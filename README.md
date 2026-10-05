@@ -2,35 +2,32 @@
 
 จำแนกปาท่องโก๋แบรนด์ vs ร้านทั่วไป + สุก/ไหม้ + ทรงดี/ชำรุด ด้วย YOLOv8 Detection (6 คลาส)
 
-**สถานะ (5 ต.ค. 2026):** Label + Export dataset บน Roboflow เสร็จแล้ว (~70%) — เหลือเทรน + วัดผล ดูรายละเอียดใน `report.md`
+**สถานะ (5 ต.ค. 2026):** เทรนรอบ 2 เสร็จ — test **mAP50 0.867** (ค่าจริงหลังแก้บั๊ก label) รายละเอียดใน `report.md` / ขั้นตอนแลปใน `report2.md`
 
-## Dataset (พร้อมเทรน)
+## Dataset
 
-- Source: Roboflow `DTPG v1` → `mixed/` (480 ภาพ, YOLOv8 format, 512x512 stretch, ไม่มี augment)
-- Split: `train 341 / valid 93 / test 46`
-- Classes (6): `brand_golden_defect`, `brand_golden_good`, `street_burnt_defect`, `street_burnt_good`, `street_golden_defect`, `street_golden_good`
-- แผนเดิม 8 คลาส (ใน `ชื่อ Class บน Roboflow.docx`) แต่ `brand_burnt_*` ไม่มีตัวอย่างจริงจึงเหลือ 6
+- `mixed2/` — DTPG v2 จาก Roboflow (852 ภาพ: train 713 / valid 93 / test 46, YOLO bbox 512px)
+- 6 classes: `brand_golden_defect`, `brand_golden_good`, `street_burnt_defect`, `street_burnt_good`, `street_golden_defect`, `street_golden_good`
+- `raw_images/` — ภาพดิบ 1,322 ใบ + วิดีโอ 2 ไฟล์ (local only, ไม่ push)
 
-```
-mixed/
-├── data.yaml
-├── train/images + train/labels (341)
-├── valid/images + valid/labels (93)
-└── test/images + test/labels (46)
-```
+## โครงสคริปต์ (ตามลำดับ)
 
-## เทรนต่อ (env พร้อมแล้ว: Python 3.13 + ultralytics 8.4 + torch 2.14)
+| ไฟล์ | ทำอะไร | วิธีรัน |
+|---|---|---|
+| `01-extract/_frames.py` | สกัดเฟรมจากวิดีโอ | `python 01-extract/_frames.py` |
+| `02-train/02-train.py` | เทรน yolov8n 80e (`cls=1.0` + copy_paste/mixup ชดเชยคลาสน้อย) | `python 02-train/02-train.py` |
+| `03-predict.py` | ทดสอบภาพนิ่ง (default: test set) | `python 03-predict.py [path/0]` |
+| `04-predict_video.py` | ทดสอบวิดีโอ (สตรีมทีละเฟรม กันแรมเต็ม) | `python 04-predict_video.py [path/0]` |
+| `05-evaluate.py` | ตาราง P/R/F1/mAP + confusion matrix + กราฟทีละภาพ | `python 05-evaluate.py` |
+| `eval_utils.py` | helper ของ evaluate | — |
+| `06-webcam_realtime.py` | realtime ผ่าน webcam (q = ออก) | `python 06-webcam_realtime.py [เลขกล้อง]` |
+| `07-pseudolabel/pseudo_label.py` | pseudo-label ภาพดิบด้วย best.pt | `python 07-pseudolabel/pseudo_label.py` |
 
-```powershell
-.\.env\Scripts\python.exe -m ultralytics detect train model=yolov8n.pt data=mixed/data.yaml epochs=100 imgsz=512 batch=16 patience=20
-.\.env\Scripts\python.exe -m ultralytics detect val model=runs/detect/train/weights/best.pt data=mixed/data.yaml
-.\.env\Scripts\python.exe -m ultralytics detect predict model=runs/detect/train/weights/best.pt source=mixed/test/images save=True
-```
+รันด้วย venv: `.\.env\Scripts\python.exe <สคริปต์>` | env: Python 3.13 + torch cu126 + ultralytics 8.4 (GPU RTX 4060)
 
-## โครง repo
+## ผลลัพธ์
 
-- `01-extract/_frames.py` — สกัดเฟรมจากวิดีโอ
-- `raw_images/` — ภาพดิบ 1,322 + วิดีโอ 2 ไฟล์ (ไม่ commit .mp4)
-- `mixed/` — YOLO dataset หลัก
-- `streed_pt_images/` — ชุด classification เก่า 231 ภาพ (สำรอง)
-- `report.md` — รายงานความคืบหน้าฉบับเต็ม
+- Val: P 0.875 / R 0.832 / **mAP50 0.895** / F1 ~0.87
+- Test (ค่าจริง): P 0.93 / R ~0.87 / **mAP50 0.867** / F1 0.858
+- Weights: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (local only)
+- จุดอ่อน: `street_burnt_good` (ตัวอย่างน้อยสุด) — เก็บเพิ่มแล้วเทรนรอบ 3 ต่อได้

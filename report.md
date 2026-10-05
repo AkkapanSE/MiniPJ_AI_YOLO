@@ -137,6 +137,9 @@ MiniPJ_AI_YOLO/
 
 ## 7. รอบ 5 ต.ค. 2026 (เย็น): เทรน baseline + pseudo-label + เทรนรอบ 2 ✅
 
+> **อัปเดตความถูกต้อง (หัวข้อ 7.4):** ตัวเลข test รอบแรก (mAP50 0.935) วัดบน label ผสมที่ ultralytics
+> ตัด polygon ทิ้งเงียบๆ — ค่าจริงบน label ที่แก้แล้วคือ test **mAP50 0.867** / F1 0.858
+
 ### 7.1 Baseline (`runs/detect/pathongko_mixed_model`, yolov8n 50e, สคริปต์ `02-train/02-train.py` ฉบับแรก)
 - Val (92 ภาพ): P 0.819 / R 0.822 / **mAP50 0.844** / mAP50-95 0.797
 - อ่อนสุด `street_burnt_defect` 0.591 → ที่มาของแผนเพิ่มข้อมูล
@@ -153,3 +156,18 @@ MiniPJ_AI_YOLO/
 - จุดอ่อนคงเหลือ: `street_burnt_good` recall 0.667 (กล่อง train แค่ 47)
 - Weights ใช้งาน: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (local only, gitignore)
 - ภาพ demo predict 46 ใบ: `runs/detect/runs/detect/predict_test/` (local only)
+
+### 7.4 แก้บั๊ก label ผสม bbox + polygon (สำคัญ)
+- `mixed2` มี label polygon ปน (train 262 / valid 69 / test 32 ไฟล์) — ultralytics เจอไฟล์ผสมแล้ว
+  **ทิ้ง polygon เงียบๆ ใช้แค่ bbox** ทำให้เทรนรอบ 2 ใช้ข้อมูลไม่ครบ + test mAP50 0.935 วัดแค่ 60 กล่อง
+- แก้: แปลง polygon→bbox (min/max) 363 ไฟล์ เป็น bbox 5 คอลัมน์ล้วน
+- วัดใหม่บน label ที่แก้แล้ว: test **mAP50 0.867** (P 0.93 / R ~0.87 / F1 0.858, ครบ 68 กล่อง) = ค่าจริง,
+  valid **mAP50 0.895** เท่าเดิม
+- บทเรียน: รอบ 3 ควรเทรนใหม่บน label ที่แก้แล้วเพื่อใช้ข้อมูลครบ 100%
+
+### 7.5 สคริปต์ตามโครงอาจารย์ (branch Home2)
+- `03-predict.py` (ภาพนิ่ง) / `04-predict_video.py` (วิดีโอ, stream ทีละเฟรมกันแรมเต็ม)
+- `05-evaluate.py` (+`eval_utils.py`): ตาราง P/R/F1/mAP รายคลาส, confusion matrix custom heatmap,
+  กราฟ matplotlib ทีละภาพกลางจอ — ย่อเหลือ ~50 บรรทัดแล้ว
+- `06-webcam_realtime.py` (realtime webcam, q=ออก) / `07-pseudolabel/` (เลื่อนจาก 03→07)
+- merge Home2→main แล้ว 2 รอบ, สถานะปัจจุบันดู `git log`
