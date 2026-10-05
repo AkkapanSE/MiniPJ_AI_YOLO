@@ -141,7 +141,7 @@ MiniPJ_AI_YOLO/
 - Val (92 ภาพ): P 0.819 / R 0.822 / **mAP50 0.844** / mAP50-95 0.797
 - อ่อนสุด `street_burnt_defect` 0.591 → ที่มาของแผนเพิ่มข้อมูล
 
-### 7.2 Pseudo-label ภาพดิบ (`05-pseudolabel/pseudo_label.py`, best.pt conf 0.5)
+### 7.2 Pseudo-label ภาพดิบ (`06-pseudolabel/pseudo_label.py`, best.pt conf 0.5)
 - ได้ label ร่าง **524 ภาพ** → review บน Roboflow → export **DTPG v2 (`mixed2/`)**
 - ตัดภาพซ้ำ mixed 480 + ภาพเปล่า 318 ใบทิ้ง (local only, gitignore)
 
