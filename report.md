@@ -171,3 +171,10 @@ MiniPJ_AI_YOLO/
   กราฟ matplotlib ทีละภาพกลางจอ — ย่อเหลือ ~50 บรรทัดแล้ว
 - `06-webcam_realtime.py` (realtime webcam, q=ออก) / `07-pseudolabel/` (เลื่อนจาก 03→07)
 - merge Home2→main แล้ว 2 รอบ, สถานะปัจจุบันดู `git log`
+
+### 7.6 เทรนรอบ 3 บน label ที่แก้แล้ว (ใช้ข้อมูลครบ 100%) ✅
+- สคริปต์เดิม `02-train/02-train.py` เปลี่ยนชื่อผลเป็น `pathongko_mixed3_fixed` (แยกจากรอบ 2)
+- Val: P 0.806 / R 0.896 / **mAP50 0.895** (เท่าเดิม) — `street_burnt_good` recall 0.667→**0.889**,
+  `street_golden_good` 0.796→0.836
+- Test: P 0.942 / R 0.857 / **mAP50 0.879** (รอบ 2: 0.867, +0.012)
+- สคริปต์ 03/04/05/06 ย้ายมาใช้ `runs/detect/pathongko_mixed3_fixed/weights/best.pt` แล้ว

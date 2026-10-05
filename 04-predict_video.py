@@ -1,4 +1,4 @@
-"""สคริปต์ทดสอบโมเดลกับวิดีโอ (inference) ด้วย best.pt รอบ 2 (mixed2, mAP50 0.895).
+"""สคริปต์ทดสอบโมเดลกับวิดีโอ (inference) ด้วย best.pt รอบ 3 (mixed2 label แก้แล้ว, mAP50 0.895).
 
 วิธีใช้:
     .\.env\Scripts\python.exe 04-predict_video.py                          # ใช้คลิป street 1004.mp4
@@ -11,7 +11,7 @@ from pathlib import Path
 from ultralytics import YOLO
 
 BASE = Path(__file__).resolve().parent
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed2_80e" / "weights" / "best.pt"
+WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed3_fixed" / "weights" / "best.pt"
 
 if __name__ == "__main__":
     assert WEIGHTS.exists(), f"ไม่พบ weights: {WEIGHTS} — รัน 02-train/02-train.py ก่อน"

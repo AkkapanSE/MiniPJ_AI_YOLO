@@ -1,4 +1,4 @@
-"""สคริปต์ทดสอบโมเดล (inference) ด้วย best.pt รอบ 2 (mixed2, mAP50 0.895).
+"""สคริปต์ทดสอบโมเดล (inference) ด้วย best.pt รอบ 3 (mixed2 label แก้แล้ว, mAP50 0.895).
 
 วิธีใช้:
     .\.env\Scripts\python.exe 03-predict.py                        # ทดสอบกับ mixed2/test/images
@@ -11,9 +11,9 @@ from pathlib import Path
 from ultralytics import YOLO
 
 BASE = Path(__file__).resolve().parent
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed2_80e" / "weights" / "best.pt"
+WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed3_fixed" / "weights" / "best.pt"
 
-# โมเดลรอบ 2: yolov8n เทรนบน mixed2 80 epochs (train 713 / P 0.875 R 0.832 mAP50 0.895)
+# โมเดลรอบ 3: yolov8n เทรนบน mixed2 label แก้แล้ว 80 epochs (train 713 / val mAP50 0.895 / test 0.879)
 # ถ้ายังไม่เคยเทรน ให้รัน 02-train/02-train.py ก่อน
 
 if __name__ == "__main__":

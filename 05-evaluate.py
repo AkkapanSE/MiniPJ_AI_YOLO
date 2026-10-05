@@ -1,4 +1,4 @@
-"""สคริปต์ประเมินโมเดล best.pt รอบ 2 บนชุด test (ไม่เคยเห็นตอนเทรน).
+"""สคริปต์ประเมินโมเดล best.pt รอบ 3 บนชุด test (ไม่เคยเห็นตอนเทรน).
 
 รัน: .\\.env\\Scripts\\python.exe 05-evaluate.py
 ผล: ตาราง P / R / F1 / mAP50 / mAP50-95 รายคลาส + ตรวจผ่านเป้า + โชว์กราฟทีละภาพ
@@ -9,7 +9,7 @@ from ultralytics import YOLO
 import eval_utils as U
 
 BASE = Path(__file__).resolve().parent
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed2_80e" / "weights" / "best.pt"
+WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed3_fixed" / "weights" / "best.pt"
 DATA = BASE / "mixed2" / "data_local.yaml"
 TARGET_MAP50 = 0.85
 

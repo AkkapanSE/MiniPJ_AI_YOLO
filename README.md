@@ -2,7 +2,8 @@
 
 จำแนกปาท่องโก๋แบรนด์ vs ร้านทั่วไป + สุก/ไหม้ + ทรงดี/ชำรุด ด้วย YOLOv8 Detection (6 คลาส)
 
-**สถานะ (5 ต.ค. 2026):** เทรนรอบ 2 เสร็จ — test **mAP50 0.867** (ค่าจริงหลังแก้บั๊ก label) รายละเอียดใน `report.md` / ขั้นตอนแลปใน `report2.md`
+**สถานะ (5 ต.ค. 2026):** เทรนรอบ 3 เสร็จ (label แก้แล้วครบ 100%) — test **mAP50 0.879**
+รายละเอียดใน `report.md` / ขั้นตอนแลปใน `report2.md`
 
 ## Dataset
 
@@ -25,9 +26,9 @@
 
 รันด้วย venv: `.\.env\Scripts\python.exe <สคริปต์>` | env: Python 3.13 + torch cu126 + ultralytics 8.4 (GPU RTX 4060)
 
-## ผลลัพธ์
+## ผลลัพธ์ (รอบ 3)
 
-- Val: P 0.875 / R 0.832 / **mAP50 0.895** / F1 ~0.87
-- Test (ค่าจริง): P 0.93 / R ~0.87 / **mAP50 0.867** / F1 0.858
-- Weights: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (local only)
-- จุดอ่อน: `street_burnt_good` (ตัวอย่างน้อยสุด) — เก็บเพิ่มแล้วเทรนรอบ 3 ต่อได้
+- Val: P 0.806 / R 0.896 / **mAP50 0.895**
+- Test: P 0.942 / R 0.857 / **mAP50 0.879**
+- Weights: `runs/detect/pathongko_mixed3_fixed/weights/best.pt` (local only)
+- จุดอ่อน: `street_burnt_defect` test R 0.6 — เก็บตัวอย่างเพิ่มได้ถ้าจะดันต่อ

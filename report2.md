@@ -52,12 +52,12 @@ confusion matrix custom (heatmap จำนวนดิบ + %), กราฟ mat
 
 | ชุด | P | R | F1 | mAP50 | mAP50-95 |
 |---|---|---|---|---|---|
-| valid (93) | 0.875 | 0.832 | ~0.87 | **0.895** | 0.831 |
-| test (46) | 0.93 | ~0.87 | 0.858 | **0.867** | ~0.87 |
+| valid (93) | 0.806 | 0.896 | ~0.85 | **0.895** | 0.868 |
+| test (46) | 0.942 | 0.857 | ~0.90 | **0.879** | 0.862 |
 
-รายคลาส (test): brand ทั้งคู่ ~0.99, `street_burnt_defect` 0.898 (จาก 0.591),
-`street_golden_defect` 0.995, `street_golden_good` 0.894 — ผ่านเป้า 0.85 ✅
-จุดอ่อนคงเหลือ: `street_burnt_good` recall 0.667 (ตัวอย่างน้อย)
+รายคลาส (test รอบ 3): brand ทั้งคู่ ~0.9+, `street_burnt_defect` 0.605 (R 0.6 — จุดอ่อนใหม่),
+`street_golden_defect` 0.995, `street_golden_good` 0.909 — ผ่านเป้า 0.85 ✅
+จุดอ่อนคงเหลือ: `street_burnt_good` (ตัวอย่างน้อย) แต่ recall ดีขึ้น 0.667→0.889 แล้ว
 
 ## 5. บั๊กที่พบและการแก้ไข
 
@@ -68,8 +68,9 @@ ultralytics เจอไฟล์ผสมแล้วทิ้ง polygon เ�
 
 ## 6. สรุปผล
 
-ได้โมเดล `runs/detect/pathongko_mixed2_80e/weights/best.pt` ผ่านเป้า (mAP50 0.867)
-งานต่อ: เก็บ `street_burnt_good` เพิ่มแล้วเทรนรอบ 3 บน label ที่แก้แล้ว (ใช้ข้อมูลครบ 100%)
+ได้โมเดลรอบ 3 `runs/detect/pathongko_mixed3_fixed/weights/best.pt` ผ่านเป้า
+(val mAP50 0.895 / test 0.879, เทรนบน label ที่แก้แล้วครบ 100%)
+งานต่อ: เก็บ `street_burnt_good`/`street_burnt_defect` ฝั่ง test เพิ่มถ้าจะดัน `street_burnt_defect` test 0.605
 
 ## ภาคผนวก: คำสั่งที่ใช้บ่อย
 

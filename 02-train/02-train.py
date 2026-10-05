@@ -1,13 +1,13 @@
 from ultralytics import YOLO
 
 if __name__ == '__main__':
-    # เทรนรอบ 2 บน mixed2 (train 713 ภาพ, เพิ่มจาก pseudo-label ผ่าน review บน Roboflow)
+    # เทรนรอบ 3 บน mixed2 หลังแก้บั๊ก label (polygon→bbox ครบ 100%, train 713 ภาพ)
     # ชดเชยคลาสน้อย (street_burnt_good 47 / brand_golden_defect 51 กล่อง เทียบ street_golden_defect 298):
     #  - cls=1.0       เพิ่มน้ำหนัก classification loss (default 0.5)
     #  - copy_paste/mixup  สังเคราะห์บริบทให้วัตถุคลาสน้อยเห็นบ่อยขึ้น
     model = YOLO('yolov8n.pt')
 
-    print("🚀 เทรนรอบ 2: mixed2 + ชดเชย class imbalance (80 epochs)...")
+    print("🚀 เทรนรอบ 3: mixed2 label แก้แล้ว + ชดเชย class imbalance (80 epochs)...")
     results = model.train(
         data='mixed2/data_local.yaml',  # path สัมบูรณ์ (data.yaml เดิมชี้ ../train ผิดที่)
         epochs=80,
@@ -19,7 +19,7 @@ if __name__ == '__main__':
         cls=1.0,                     # เน้น classification loss ชดเชยคลาสน้อย
         copy_paste=0.3,              # สุ่มแปะวัตถุเพิ่ม
         mixup=0.2,                   # ผสมภาพเพิ่มความหลากหลาย
-        name='pathongko_mixed2_80e'  # ผลใน runs/detect/
+        name='pathongko_mixed3_fixed'  # ผลใน runs/detect/ (แยกจากรอบ 2)
     )
 
-    print("🎉 เทรนรอบ 2 เสร็จสิ้น!")
+    print("🎉 เทรนรอบ 3 เสร็จสิ้น!")
