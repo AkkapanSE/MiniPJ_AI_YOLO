@@ -59,16 +59,25 @@ if __name__ == "__main__":
             "R_curve.png", "PR_curve.png", "results.png"]
     paths = [m.save_dir / p for p in pngs if (m.save_dir / p).exists()]
     print(f"กราฟเซฟที่: {m.save_dir}")
-    fig, axes = plt.subplots(2, 3, figsize=(18, 11))
+    # figsize 12.8x7.2 (= 1280x720 px) พอดีจอโน้ตบุ๊ก ไม่ล้น (เซฟไฟล์แยกที่ dpi สูงกว่า)
+    fig, axes = plt.subplots(2, 3, figsize=(12.8, 7.2))
     fig.suptitle(f"Evaluate {WEIGHTS.parent.parent.name} (test mAP50={b.map50:.3f})",
-                 fontsize=14, y=0.98)
+                 fontsize=13, y=0.98)
     for ax, p in zip(axes.flat, paths):
         ax.imshow(imread(p), aspect="equal")
-        ax.set_title(p.name, fontsize=11, pad=6)
+        ax.set_title(p.name, fontsize=10, pad=4)
         ax.axis("off")
     for ax in axes.flat[len(paths):]:
         ax.axis("off")
-    fig.tight_layout(rect=[0, 0.02, 1, 0.94])  # เว้นที่ให้ suptitle ขอบไม่ถูกตัด
-    fig.savefig(m.save_dir / "evaluate_summary.png", dpi=100)
+    fig.tight_layout(rect=[0, 0.02, 1, 0.93])  # เว้นที่ให้ suptitle ขอบไม่ถูกตัด
+    fig.savefig(m.save_dir / "evaluate_summary.png", dpi=150)
     print(f"รวมกราฟเซฟที่: {m.save_dir / 'evaluate_summary.png'}")
+    # ขยายหน้าต่างกราฟเต็มจอ (รองรับทั้ง Tk / Qt)
+    try:
+        plt.get_current_fig_manager().window.state("zoomed")  # TkAgg (default Windows)
+    except Exception:
+        try:
+            plt.get_current_fig_manager().window.showMaximized()  # Qt
+        except Exception:
+            pass
     plt.show()
