@@ -95,39 +95,52 @@ def build_confusion_matrix(model, names: dict) -> np.ndarray:
     return cm
 
 
-def plot_confusion_matrices(cm: np.ndarray, labels: list, save_dir: Path):
-    """heatmap 2 แบบ: จำนวนดิบ + % รายแถว (normalize)"""
+def show_dashboard(cm: np.ndarray, labels: list, curve_pngs: list, save_path: Path, title: str):
+    """แดชบอร์ด matplotlib หน้าต่างเดียว: heatmap custom (วาดเอง) + curves (ultralytics)"""
     import matplotlib.pyplot as plt
+    from matplotlib.image import imread
 
     row_sum = cm.sum(axis=1, keepdims=True)
     norm = np.divide(cm, row_sum, out=np.zeros_like(cm, dtype=float),
                      where=row_sum != 0)
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12.8, 5.6))
-    fig.suptitle("Confusion Matrix แบบ custom (IoU>=0.5, conf>=0.5)", fontsize=13, y=0.99)
-    for ax, mat, fmt, title in [
-        (ax1, cm, "d", "จำนวนดิบ (count)"),
-        (ax2, norm, ".0%", "% รายแถว (แถว=true class)"),
-    ]:
-        ax.imshow(mat, cmap="Blues", aspect="equal")
-        ax.set_xticks(range(len(labels)), labels, rotation=30, ha="right", fontsize=9)
-        ax.set_yticks(range(len(labels)), labels, fontsize=9)
-        ax.set_xlabel("Predicted", fontsize=10)
-        ax.set_ylabel("True", fontsize=10)
-        ax.set_title(title, fontsize=11)
-        thresh = mat.max() / 2
-        for i in range(len(labels)):
-            for j in range(len(labels)):
-                v = f"{mat[i, j]:{fmt}}"
-                ax.text(j, i, v, ha="center", va="center", fontsize=9,
-                        color="white" if mat[i, j] > thresh else "black")
+    # เตรียม 6 ช่อง: CM จำนวนดิบ / CM % / F1 / PR / results / CM ultralytics
+    cells = [("custom-count", None), ("custom-norm", None)]
+    cells += [("png", p) for p in curve_pngs[:4]]
+
+    fig, axes = plt.subplots(2, 3, figsize=(12.8, 7.2))
+    fig.suptitle(title, fontsize=13, y=0.98)
+    for ax, (kind, payload) in zip(axes.flat, cells):
+        if kind == "png" and payload is not None:
+            ax.imshow(imread(payload), aspect="equal")
+            ax.set_title(Path(payload).name, fontsize=10, pad=4)
+            ax.axis("off")
+        elif kind in ("custom-count", "custom-norm"):
+            mat = cm if kind == "custom-count" else norm
+            fmt = "d" if kind == "custom-count" else ".0%"
+            ax.imshow(mat, cmap="Blues", aspect="equal")
+            ax.set_xticks(range(len(labels)), labels, rotation=30, ha="right", fontsize=8)
+            ax.set_yticks(range(len(labels)), labels, fontsize=8)
+            ax.set_xlabel("Predicted", fontsize=9)
+            ax.set_ylabel("True", fontsize=9)
+            ax.set_title("CM จำนวนดิบ" if kind == "custom-count" else "CM % รายแถว",
+                         fontsize=10, pad=4)
+            thresh = mat.max() / 2
+            for i in range(len(labels)):
+                for j in range(len(labels)):
+                    ax.text(j, i, f"{mat[i, j]:{fmt}}", ha="center", va="center",
+                            fontsize=8, color="white" if mat[i, j] > thresh else "black")
+        else:
+            ax.axis("off")
+    for ax in axes.flat[len(cells):]:
+        ax.axis("off")
     fig.tight_layout(rect=[0, 0.02, 1, 0.93])
-    fig.savefig(save_dir / "confusion_matrix_custom.png", dpi=150)
-    print(f"confusion matrix แบบ custom: {save_dir / 'confusion_matrix_custom.png'}")
+    fig.savefig(save_path, dpi=150)
+    print(f"แดชบอร์ดรวม: {save_path}")
     try:
-        plt.get_current_fig_manager().window.state("zoomed")
+        plt.get_current_fig_manager().window.state("zoomed")  # TkAgg
     except Exception:
         try:
-            plt.get_current_fig_manager().window.showMaximized()
+            plt.get_current_fig_manager().window.showMaximized()  # Qt
         except Exception:
             pass
     plt.show()
@@ -160,7 +173,7 @@ if __name__ == "__main__":
     print(f"\n{'✅ ผ่านเป้า' if ok else '❌ ต่ำกว่าเป้า'} "
           f"mAP50 = {b.map50:.3f} (เป้า {TARGET_MAP50}) | F1 เฉลี่ย = {mean_f1:.3f}")
 
-    # confusion matrix แบบ custom: heatmap จำนวนดิบ + % (เทียบกับแบบ ultralytics)
+    # confusion matrix แบบ custom + แดชบอร์ด matplotlib หน้าต่างเดียว
     print("\n🧮 สร้าง confusion matrix แบบ custom ...")
     cm = build_confusion_matrix(model, m.names)
     labels = [m.names[i] for i in range(len(m.names))] + ["background"]
@@ -168,35 +181,12 @@ if __name__ == "__main__":
     print(f"{'':<24}{' '.join(f'{l[:6]:>7}' for l in labels)}")
     for i, l in enumerate(labels):
         print(f"{l:<24}{' '.join(f'{cm[i, j]:>7d}' for j in range(len(labels)))}")
-    plot_confusion_matrices(cm, labels, m.save_dir)
 
-    # โชว์กราฟที่ ultralytics เซฟไว้ (confusion matrix + curves)
-    import matplotlib.pyplot as plt
-    from matplotlib.image import imread
-
-    pngs = ["confusion_matrix.png", "F1_curve.png", "P_curve.png",
-            "R_curve.png", "PR_curve.png", "results.png"]
-    paths = [m.save_dir / p for p in pngs if (m.save_dir / p).exists()]
-    print(f"กราฟเซฟที่: {m.save_dir}")
-    # figsize 12.8x7.2 (= 1280x720 px) พอดีจอโน้ตบุ๊ก ไม่ล้น (เซฟไฟล์แยกที่ dpi สูงกว่า)
-    fig, axes = plt.subplots(2, 3, figsize=(12.8, 7.2))
-    fig.suptitle(f"Evaluate {WEIGHTS.parent.parent.name} (test mAP50={b.map50:.3f})",
-                 fontsize=13, y=0.98)
-    for ax, p in zip(axes.flat, paths):
-        ax.imshow(imread(p), aspect="equal")
-        ax.set_title(p.name, fontsize=10, pad=4)
-        ax.axis("off")
-    for ax in axes.flat[len(paths):]:
-        ax.axis("off")
-    fig.tight_layout(rect=[0, 0.02, 1, 0.93])  # เว้นที่ให้ suptitle ขอบไม่ถูกตัด
-    fig.savefig(m.save_dir / "evaluate_summary.png", dpi=150)
-    print(f"รวมกราฟเซฟที่: {m.save_dir / 'evaluate_summary.png'}")
-    # ขยายหน้าต่างกราฟเต็มจอ (รองรับทั้ง Tk / Qt)
-    try:
-        plt.get_current_fig_manager().window.state("zoomed")  # TkAgg (default Windows)
-    except Exception:
-        try:
-            plt.get_current_fig_manager().window.showMaximized()  # Qt
-        except Exception:
-            pass
-    plt.show()
+    curves = ["F1_curve.png", "PR_curve.png", "P_curve.png", "R_curve.png",
+              "results.png", "confusion_matrix.png"]
+    curve_paths = [str(m.save_dir / p) for p in curves if (m.save_dir / p).exists()]
+    print(f"กราฟต้นฉบับเซฟที่: {m.save_dir}")
+    show_dashboard(cm, labels, curve_paths,
+                   m.save_dir / "evaluate_summary.png",
+                   f"Evaluate {WEIGHTS.parent.parent.name} "
+                   f"(test mAP50={b.map50:.3f}, F1={mean_f1:.3f})")
