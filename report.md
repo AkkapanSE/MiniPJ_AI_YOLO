@@ -1,8 +1,8 @@
 # รายงานความคืบหน้าโปรเจกต์ Patongko Detection ด้วย YOLO
 
-**วันที่อัปเดต:** 5 ตุลาคม 2026 (อัปเดตรอบ 4: ได้ดาต้าเซ็ต Roboflow `mixed/` แล้ว)
+**วันที่อัปเดต:** 6 ตุลาคม 2026 (เทรนครบ 5 รอบ — โมเดลดีสุดรอบ 3)
 **ที่ตั้งโปรเจกต์:** `C:\Users\chano\MiniPJ_AI_YOLO`
-**สถานะโดยรวม:** 🟢 **ขั้นเตรียมข้อมูล + Label เสร็จ ~70% — ได้ YOLO Dataset พร้อมเทรน 480 ภาพ 6 คลาส เหลือ Train / Eval**
+**สถานะโดยรวม:** 🟢 **~95% — เทรน + ประเมินเสร็จ โมเดลรอบ 3 test mAP50 0.879 ผ่านเป้า 0.85 พร้อมใช้**
 
 ---
 
@@ -15,11 +15,11 @@
 | 3. ทำความสะอาดข้อมูล / คัดภาพ (Data Cleaning) | ✅ เสร็จบางส่วน (บน Roboflow) | คัดเหลือ 480 ภาพที่ label ได้จริง ที่เหลือเป็นภาพเปล่า/เบลอถูกตัดออกตอนอัปโหลด Roboflow |
 | 4. ตีกรอบ Annotation สำหรับ YOLO (Labeling) | ✅ เสร็จ (บน Roboflow) | Label บน Roboflow โปรเจกต์ `dtpg` version 1 ครบ 480 ภาพ ฟอร์แมต YOLOv8 |
 | 5. Export YOLO Dataset (`mixed/`) | ✅ เสร็จ | `train 341 / valid 93 / test 46` รวม 480 ภาพ + `data.yaml` 6 คลาส |
-| 6. Train / Val YOLO Detection | ❌ ยังไม่ได้ทำ (local) | มีแค่ชุดข้อมูล ยังไม่มี `runs/`, ไม่มี `.pt` เอง — ผู้ใช้แจ้งว่าเคย train บน Roboflow แล้ว แต่ยังไม่ได้ดึง weights/metrics มาเก็บใน repo |
-| 7. ประเมินผล + ทดสอบ Detection | ❌ ยังไม่ได้ทำ (local) | ไม่มี metrics (mAP50, Precision, Recall) ใน repo |
+| 6. Train / Val YOLO Detection | ✅ เสร็จ (รอบ 3 ดีสุด) | เทรน 5 รอบบน `mixed2/` — รอบ 3 `yolov8n 80e` ดีสุด val mAP50 0.895 / `runs/detect/pathongko_mixed3_fixed/weights/best.pt` (รอบ 4 s 0.89 / รอบ 5 oversample 0.88 ไม่ชนะ — ดู 7.7–7.8) |
+| 7. ประเมินผล + ทดสอบ Detection | ✅ เสร็จ | `05-evaluate.py` รายงาน test mAP50 0.879 (P 0.942 / R 0.857 / F1 ~0.90) + confusion matrix + กราฟทีละภาพ; `03/04/06` ทดสอบภาพนิ่ง/วิดีโอ/webcam แล้ว |
 | 8. ชุด classification สำรอง `streed_pt_images` | 🟡 มีอยู่ 231 ภาพ | `train 138 / val 46 / test 47` คลาสเดียว `Pa_Thong_Ko` — ไม่ได้ใช้ในสาย YOLO หลักแล้ว |
 
-> **สรุป:** จากเดิม ~40% (รอบ 3) ตอนนี้ขึ้นเป็น **~70%** — ข้ามขั้น Label มาแล้ว เหลือ **“เทรน YOLO local + วัดผล”** อย่างเดียว
+> **สรุป:** **~95% — Train/Eval เสร็จแล้ว (รอบ 3 ดีสุด test 0.879)** — ข้ามขั้น Label มาแล้ว รายละเอียดรอบ 4–5 ดูข้อ 7.7–7.8
 
 ---
 
@@ -86,13 +86,13 @@ MiniPJ_AI_YOLO/
 
 ---
 
-## 3. สิ่งที่ยังขาดสำหรับ YOLO Detection (เหลือแค่ขั้นเทรน)
+## 3. สิ่งที่ยังขาดสำหรับ YOLO Detection (อัปเดต 6 ต.ค. 2026 — Train/Eval เสร็จแล้ว)
 
-1. **Weights/metrics จาก Roboflow Train:** ผู้ใช้แจ้งว่า train บน Roboflow แล้ว แต่ยังไม่ได้ export `best.pt` + ค่า mAP/Precision/Recall มาเก็บใน repo — ถ้ามีให้โหลดมาไว้ที่ `runs/roboflow/` จะได้เทียบกับ local train
-2. **Local train:** ยังไม่รัน `yolo detect train model=yolov8n.pt data=mixed/data.yaml epochs=100 imgsz=512` (imgsz 512 ตรงกับ preprocessing)
-3. **สคริปต์เทรนมาตรฐาน:** ไม่มี `train.py` / `requirements.txt` — ตอนนี้ใช้คำสั่ง ultralytics CLI ได้ แต่ควรเพิ่มไฟล์ไว้กันลืม
-4. **Git:** ยังไม่มี commit เลย + `.gitignore` เป็น `*` (ignore ทุกอย่าง) — ต้องแก้ก่อน commit ไม่งั้น `mixed/` จะไม่เข้า git
-5. **วิดีโอใหญ่:** `raw_images/vdo/*.mp4` ~358 MB ห้าม commit — ใส่ gitignore
+1. **Weights/metrics:** ✅ มีแล้ว — `runs/detect/pathongko_mixed3_fixed/weights/best.pt` (val 0.895 / test 0.879) + `05-evaluate.py` รายงาน P/R/F1/mAP รายคลาส
+2. **Local train:** ✅ รันแล้ว 5 รอบ (baseline + รอบ 2–5) — โมเดลใช้งานจริงคือรอบ 3
+3. **สคริปต์เทรนมาตรฐาน:** ✅ มี `02-train/02-train.py` + `02-train/oversample.py` (รอบ 5)
+4. **Git:** ✅ มี commit แล้ว (branch `Home2`) — เหลือ merge `Home2` → `main` ถ้าจะปิดงาน
+5. **วิดีโอใหญ่:** ✅ `raw_images/vdo/*.mp4` ใส่ gitignore แล้ว (local only)
 
 ---
 
