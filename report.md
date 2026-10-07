@@ -126,6 +126,7 @@ MiniPJ_AI_YOLO/
 3. **ไม่มี Augmentation:** export มาตัวเปล่า — ชดเชยด้วย augmentation ตอนเทรน (`hsv_h, flipud, mosaic` default ของ ultralytics เปิดอยู่แล้ว)
 4. **ภาพ background 7 ใบ:** มีประโยชน์เป็น negative แต่อย่าลบ — เก็บไว้ลด false positive
 5. **วิดีโอ + dataset ใหญ่:** อย่า commit `.mp4` / ภาพ 960 ไฟล์ทั้งหมดถ้าไม่จำเป็น — repo จะบวม
+6. **`brand_burnt_*` ไม่มีข้อมูลเลย (แผน 8 → ทำจริง 6):** `brand_burnt_good` / `brand_burnt_defect` มี 0 ภาพ 0 กล่องทั้ง `mixed2` (train/valid/test) เพราะแบรนด์คุมไฟดี ไม่พบเคสไหม้จริง — โมเดล `best.pt (nc=6)` จึงจำแนก 2 คลาสนี้ไม่ได้เลย (`03/04/06` เปิดกล้องจ่อแบรนด์ไหม้ก็จะทายเป็น `street_burnt_*`/`brand_golden_*` หรือหลุด) ไม่นับเป็นเป้าไม่ถึง แต่เป็นข้อจำกัดที่ต้องระบุในรายงาน/ตอนพรีเซนต์
 
 ---
 
