@@ -22,7 +22,8 @@
 | `mixed2/` (v2, ชุดหลัก) | DTPG v2 = v1 + pseudo-label 524 ภาพที่ผ่าน review | **852 ภาพ** (train 713 / valid 93 / test 46) |
 
 6 คลาส: `brand_golden_defect/good`, `street_burnt_defect/good`, `street_golden_defect/good`
-(แผนเดิม 8 คลาส แต่ `brand_burnt_*` ไม่มีตัวอย่างจริง)
+(แผนเดิม 8 คลาส แต่ `brand_burnt_good`/`brand_burnt_defect` 0 ภาพ 0 กล่องทั้ง `mixed2` เพราะแบรนด์คุมไฟดี ไม่พบเคสไหม้จริง —
+โมเดล `best.pt (nc=6)` จึงจำแนก 2 คลาสนี้ไม่ได้เลย `03/04/06` จ่อแบรนด์ไหม้ก็ทายเป็น 1 ใน 6 ที่มีเท่านั้น)
 
 ## 3. ขั้นตอนการทดลอง
 
@@ -40,15 +41,22 @@ yolov8n 50e บน `mixed/` → val mAP50 0.844 (อ่อนสุด `street_b
 yolov8n **80e**, `cls=1.0` + `copy_paste=0.3` + `mixup=0.2` ชดเชยคลาสน้อย
 (`street_burnt_good` มีแค่ 47 กล่อง เทียบ `street_golden_defect` 298)
 
-### 3.5 ประเมิน (`05-evaluate.py` + `eval_utils.py`)
+### 3.5 เทรนรอบ 3–5 (สรุป 5 รอบ — รอบ 3 ดีสุด, รายละเอียดเต็มใน `report.md` ข้อ 7.6–7.8)
+- รอบ1 baseline: `yolov8n 50e` บน `mixed/` → val 0.844
+- รอบ2: `yolov8n 80e` บน `mixed2/` → val 0.895 / test 0.867 (label ครบหลังแก้ polygon)
+- **รอบ3 (ใช้จริง): `yolov8n 80e` บน label แก้แล้ว 100% → val 0.895 / test 0.879**
+- รอบ4: `yolov8s` → val 0.89 / test 0.872 (แพ้รอบ3 — overfit)
+- รอบ5 oversample (`mixed2_os/` train 713→1,164): `yolov8s 100e` → val 0.88 / test 0.878 (เสมอตัว)
+
+### 3.6 ประเมิน (`05-evaluate.py` + `eval_utils.py`)
 ตาราง P/R/F1/mAP50/mAP50-95 รายคลาส (คลาสที่ไม่มีใน test ขึ้น N/A),
 confusion matrix custom (heatmap จำนวนดิบ + %), กราฟ matplotlib ทีละภาพกลางจอ
 
-### 3.6 ทดสอบใช้งาน
+### 3.7 ทดสอบใช้งาน
 `03-predict.py` (ภาพนิ่ง) / `04-predict_video.py` (วิดีโอ, stream กันแรมเต็ม) /
 `06-webcam_realtime.py` (webcam, q=ออก)
 
-## 4. ผลการทดลอง
+## 4. ผลการทดลอง (เทรน 5 รอบ — รอบ 3 ดีสุด)
 
 | ชุด | P | R | F1 | mAP50 | mAP50-95 |
 |---|---|---|---|---|---|
@@ -68,8 +76,9 @@ ultralytics เจอไฟล์ผสมแล้วทิ้ง polygon เ�
 
 ## 6. สรุปผล
 
-ได้โมเดลรอบ 3 `runs/detect/pathongko_mixed3_fixed/weights/best.pt` ผ่านเป้า
+เทรนทั้งหมด 5 รอบ ได้โมเดลรอบ 3 `runs/detect/pathongko_mixed3_fixed/weights/best.pt` ผ่านเป้า
 (val mAP50 0.895 / test 0.879, เทรนบน label ที่แก้แล้วครบ 100%)
+ข้อจำกัด: `brand_burnt_*` จำแนกไม่ได้ (0 ข้อมูล) + `street_burnt_good` ไม่มีใน test
 งานต่อ: เก็บ `street_burnt_good`/`street_burnt_defect` ฝั่ง test เพิ่มถ้าจะดัน `street_burnt_defect` test 0.605
 
 ## ภาคผนวก: คำสั่งที่ใช้บ่อย

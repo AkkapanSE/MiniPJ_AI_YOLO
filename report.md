@@ -1,8 +1,8 @@
 # รายงานความคืบหน้าโปรเจกต์ Patongko Detection ด้วย YOLO
 
-**วันที่อัปเดต:** 5 ตุลาคม 2026 (อัปเดตรอบ 4: ได้ดาต้าเซ็ต Roboflow `mixed/` แล้ว)
+**วันที่อัปเดต:** 6 ตุลาคม 2026 (เทรนครบ 5 รอบ — โมเดลดีสุดรอบ 3)
 **ที่ตั้งโปรเจกต์:** `C:\Users\chano\MiniPJ_AI_YOLO`
-**สถานะโดยรวม:** 🟢 **ขั้นเตรียมข้อมูล + Label เสร็จ ~70% — ได้ YOLO Dataset พร้อมเทรน 480 ภาพ 6 คลาส เหลือ Train / Eval**
+**สถานะโดยรวม:** 🟢 **~95% — เทรน + ประเมินเสร็จ โมเดลรอบ 3 test mAP50 0.879 ผ่านเป้า 0.85 พร้อมใช้**
 
 ---
 
@@ -15,11 +15,11 @@
 | 3. ทำความสะอาดข้อมูล / คัดภาพ (Data Cleaning) | ✅ เสร็จบางส่วน (บน Roboflow) | คัดเหลือ 480 ภาพที่ label ได้จริง ที่เหลือเป็นภาพเปล่า/เบลอถูกตัดออกตอนอัปโหลด Roboflow |
 | 4. ตีกรอบ Annotation สำหรับ YOLO (Labeling) | ✅ เสร็จ (บน Roboflow) | Label บน Roboflow โปรเจกต์ `dtpg` version 1 ครบ 480 ภาพ ฟอร์แมต YOLOv8 |
 | 5. Export YOLO Dataset (`mixed/`) | ✅ เสร็จ | `train 341 / valid 93 / test 46` รวม 480 ภาพ + `data.yaml` 6 คลาส |
-| 6. Train / Val YOLO Detection | ❌ ยังไม่ได้ทำ (local) | มีแค่ชุดข้อมูล ยังไม่มี `runs/`, ไม่มี `.pt` เอง — ผู้ใช้แจ้งว่าเคย train บน Roboflow แล้ว แต่ยังไม่ได้ดึง weights/metrics มาเก็บใน repo |
-| 7. ประเมินผล + ทดสอบ Detection | ❌ ยังไม่ได้ทำ (local) | ไม่มี metrics (mAP50, Precision, Recall) ใน repo |
+| 6. Train / Val YOLO Detection | ✅ เสร็จ (รอบ 3 ดีสุด) | เทรน 5 รอบบน `mixed2/` — รอบ 3 `yolov8n 80e` ดีสุด val mAP50 0.895 / `runs/detect/pathongko_mixed3_fixed/weights/best.pt` (รอบ 4 s 0.89 / รอบ 5 oversample 0.88 ไม่ชนะ — ดู 7.7–7.8) |
+| 7. ประเมินผล + ทดสอบ Detection | ✅ เสร็จ | `05-evaluate.py` รายงาน test mAP50 0.879 (P 0.942 / R 0.857 / F1 ~0.90) + confusion matrix + กราฟทีละภาพ; `03/04/06` ทดสอบภาพนิ่ง/วิดีโอ/webcam แล้ว |
 | 8. ชุด classification สำรอง `streed_pt_images` | 🟡 มีอยู่ 231 ภาพ | `train 138 / val 46 / test 47` คลาสเดียว `Pa_Thong_Ko` — ไม่ได้ใช้ในสาย YOLO หลักแล้ว |
 
-> **สรุป:** จากเดิม ~40% (รอบ 3) ตอนนี้ขึ้นเป็น **~70%** — ข้ามขั้น Label มาแล้ว เหลือ **“เทรน YOLO local + วัดผล”** อย่างเดียว
+> **สรุป:** **~95% — Train/Eval เสร็จแล้ว (รอบ 3 ดีสุด test 0.879)** — ข้ามขั้น Label มาแล้ว รายละเอียดรอบ 4–5 ดูข้อ 7.7–7.8
 
 ---
 
@@ -86,13 +86,13 @@ MiniPJ_AI_YOLO/
 
 ---
 
-## 3. สิ่งที่ยังขาดสำหรับ YOLO Detection (เหลือแค่ขั้นเทรน)
+## 3. สิ่งที่ยังขาดสำหรับ YOLO Detection (อัปเดต 6 ต.ค. 2026 — Train/Eval เสร็จแล้ว)
 
-1. **Weights/metrics จาก Roboflow Train:** ผู้ใช้แจ้งว่า train บน Roboflow แล้ว แต่ยังไม่ได้ export `best.pt` + ค่า mAP/Precision/Recall มาเก็บใน repo — ถ้ามีให้โหลดมาไว้ที่ `runs/roboflow/` จะได้เทียบกับ local train
-2. **Local train:** ยังไม่รัน `yolo detect train model=yolov8n.pt data=mixed/data.yaml epochs=100 imgsz=512` (imgsz 512 ตรงกับ preprocessing)
-3. **สคริปต์เทรนมาตรฐาน:** ไม่มี `train.py` / `requirements.txt` — ตอนนี้ใช้คำสั่ง ultralytics CLI ได้ แต่ควรเพิ่มไฟล์ไว้กันลืม
-4. **Git:** ยังไม่มี commit เลย + `.gitignore` เป็น `*` (ignore ทุกอย่าง) — ต้องแก้ก่อน commit ไม่งั้น `mixed/` จะไม่เข้า git
-5. **วิดีโอใหญ่:** `raw_images/vdo/*.mp4` ~358 MB ห้าม commit — ใส่ gitignore
+1. **Weights/metrics:** ✅ มีแล้ว — `runs/detect/pathongko_mixed3_fixed/weights/best.pt` (val 0.895 / test 0.879) + `05-evaluate.py` รายงาน P/R/F1/mAP รายคลาส
+2. **Local train:** ✅ รันแล้ว 5 รอบ (baseline + รอบ 2–5) — โมเดลใช้งานจริงคือรอบ 3
+3. **สคริปต์เทรนมาตรฐาน:** ✅ มี `02-train/02-train.py` + `02-train/oversample.py` (รอบ 5)
+4. **Git:** ✅ มี commit แล้ว (branch `Home2`) — เหลือ merge `Home2` → `main` ถ้าจะปิดงาน
+5. **วิดีโอใหญ่:** ✅ `raw_images/vdo/*.mp4` ใส่ gitignore แล้ว (local only)
 
 ---
 
@@ -126,12 +126,15 @@ MiniPJ_AI_YOLO/
 3. **ไม่มี Augmentation:** export มาตัวเปล่า — ชดเชยด้วย augmentation ตอนเทรน (`hsv_h, flipud, mosaic` default ของ ultralytics เปิดอยู่แล้ว)
 4. **ภาพ background 7 ใบ:** มีประโยชน์เป็น negative แต่อย่าลบ — เก็บไว้ลด false positive
 5. **วิดีโอ + dataset ใหญ่:** อย่า commit `.mp4` / ภาพ 960 ไฟล์ทั้งหมดถ้าไม่จำเป็น — repo จะบวม
+6. **`brand_burnt_*` ไม่มีข้อมูลเลย (แผน 8 → ทำจริง 6):** `brand_burnt_good` / `brand_burnt_defect` มี 0 ภาพ 0 กล่องทั้ง `mixed2` (train/valid/test) เพราะแบรนด์คุมไฟดี ไม่พบเคสไหม้จริง — โมเดล `best.pt (nc=6)` จึงจำแนก 2 คลาสนี้ไม่ได้เลย (`03/04/06` เปิดกล้องจ่อแบรนด์ไหม้ก็จะทายเป็น `street_burnt_*`/`brand_golden_*` หรือหลุด) ไม่นับเป็นเป้าไม่ถึง แต่เป็นข้อจำกัดที่ต้องระบุในรายงาน/ตอนพรีเซนต์
 
 ---
 
 ## 6. คำตอบสั้นๆ: ตอนนี้ถึงขั้นไหน?
 
-> **ทำถึงขั้น “Label + Export YOLO Dataset บน Roboflow เสร็จ (480 ภาพ 6 คลาส, train 341 / valid 93 / test 46) พร้อมเทรน local แล้ว (env ครบ)” คิดเป็น ~70% — ขั้นต่อไปคือ “รันเทรน YOLO + วัด mAP + เทียบผล Roboflow Train”**
+> **จบการเทรน 5 รอบ — โมเดลดีสุดคือรอบ 3 (`pathongko_mixed3_fixed`, yolov8n):
+> val mAP50 0.895 / test 0.879 ผ่านเป้า 0.85 — พร้อมใช้ คิดเป็น ~95%
+> (รอบ 4 yolov8s / รอบ 5 oversample ไม่ชนะรอบ 3 — ดู 7.7–7.8)**
 
 ---
 
@@ -151,10 +154,11 @@ MiniPJ_AI_YOLO/
 ### 7.3 รอบ 2 (`02-train/02-train.py` ฉบับปัจจุบัน, yolov8n **80e**, `cls=1.0` + `copy_paste=0.3` + `mixup=0.2`)
 - `mixed2/`: train **713** (+372) / valid 93 / test 46 (valid/test ชุดเดิม เทียบ baseline ได้ตรง)
 - Val: P 0.875 / R 0.832 / **mAP50 0.895** / mAP50-95 0.831 ✅ ผ่านเป้า 0.85
-- Test (`split=test`): P 0.93 / R 0.897 / **mAP50 0.935**
+- Test (`split=test`): P 0.93 / R 0.897 / **mAP50 0.935** ⚠️ เลขนี้วัดบน label ผสม
+  (polygon โดน ultralytics ทิ้งเงียบๆ เหลือ 60 กล่อง — ดู 7.4, ค่าจริง 0.867)
 - `street_burnt_defect`: 0.591 → **0.767** (+0.176) / brand ทั้งคู่ 0.995
 - จุดอ่อนคงเหลือ: `street_burnt_good` recall 0.667 (กล่อง train แค่ 47)
-- Weights ใช้งาน: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (local only, gitignore)
+- Weights รอบ 2: `runs/detect/pathongko_mixed2_80e/weights/best.pt` (superseded — ปัจจุบันใช้รอบ 3)
 - ภาพ demo predict 46 ใบ: `runs/detect/runs/detect/predict_test/` (local only)
 
 ### 7.4 แก้บั๊ก label ผสม bbox + polygon (สำคัญ)
@@ -178,3 +182,13 @@ MiniPJ_AI_YOLO/
   `street_golden_good` 0.796→0.836
 - Test: P 0.942 / R 0.857 / **mAP50 0.879** (รอบ 2: 0.867, +0.012)
 - สคริปต์ 03/04/05/06 ย้ายมาใช้ `runs/detect/pathongko_mixed3_fixed/weights/best.pt` แล้ว
+
+### 7.7 เทรนรอบ 4: ขยับเป็น yolov8s (ไม่ชนะรอบ 3)
+- เหตุผล: ดัน `street_burnt_defect` (test R 0.6) ด้วยโมเดลใหญ่ขึ้น (11M params)
+- Val mAP50 **0.89** / Test **0.872** (รอบ 3: 0.895/0.879) — แพ้รอบ 3 เล็กน้อย สรุปไม่ใช้
+
+### 7.8 เทรนรอบ 5: oversample คลาสน้อย (`02-train/oversample.py` → `mixed2_os/`, local only)
+- train 713→**1,164** ภาพ กล่อง 0:204 / 1:174 / 2:394 / 3:235 / 4:309 / 5:315 (สัดส่วน 6.3:1→2.3:1)
+- yolov8s 100e — Val mAP50 **0.88** / Test **0.878** (เสมอรอบ 3, `street_burnt_defect` test 0.624/R 0.6)
+- สรุป: oversampling ไม่ขยับ test — **โมเดลใช้งานจริงยังคงรอบ 3**
+- ทางที่เหลือถ้าจะดัน `street_burnt_defect` ต่อ: เก็บตัวอย่างไหม้เพิ่มจากหน้างานจริงเท่านั้น

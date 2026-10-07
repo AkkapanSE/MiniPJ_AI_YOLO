@@ -17,3 +17,5 @@ raw_images/
 pseudo/
 pseudo_for_roboflow.zip
 00001/
+# oversample ชั่วคราว (สร้างใหม่ได้ด้วย 02-train/oversample.py)
+mixed2_os/
