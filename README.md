@@ -68,3 +68,13 @@
 ![predict brand](runs/detect/predict_demo/brand_0213_jpg.rf.6a5bd45ddb49f8a91791b2710a8bb345.jpg)
 ![predict street](runs/detect/predict_demo/street_0100_jpg.rf.ac60bbba81c0168396e5793256c30e90.jpg)
 ![รัน predict วิดีโอ](<ReportImages/detech cdo.png>)
+
+## 5. สรุปเป้าหมาย สำเร็จ / ไม่สำเร็จ
+
+| เป้าหมาย | เกณฑ์ | ผลจริง | สถานะ |
+|---|---|---|---|
+| 1. ชุดข้อมูล 6 คลาสจากวิดีโอจริง | ครบ train/valid/test | 852 ภาพ (713/93/46) + label ครบทุกรูป | ✅ สำเร็จ |
+| 2. เทรนผ่านเป้า | test mAP50 > 0.85 | รอบ 3 test **0.879** (val 0.895) | ✅ สำเร็จ |
+| 3. ประเมิน + ใช้งานจริง | P/R/F1/mAP + ภาพนิ่ง/วิดีโอ/webcam | `05` ครบ + `03` 59 กล่อง + `04/06` stream ไม่แรมเต็ม | ✅ สำเร็จ |
+| 4. ครบ 8 คลาสตามแผน | มี `brand_burnt_*` | 0 ภาพ 0 กล่อง (แบรนด์ไม่ไหม้จริง) จำแนกไม่ได้ | ❌ ไม่สำเร็จ (ข้อจำกัดข้อมูล) |
+| 5. ดันคลาสไหม้ | `street_burnt_defect` R ดี + มี `street_burnt_good` ใน test | R แค่ 0.6 + คลาส 3 ไม่มีใน test (train 47/valid 9) | 🟡 ไม่ถึงเป้าย่อย (ต้องเก็บไหม้จริงเพิ่ม) |
