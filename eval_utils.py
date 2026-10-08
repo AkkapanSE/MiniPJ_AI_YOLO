@@ -4,7 +4,7 @@ import numpy as np
 
 BASE = Path(__file__).resolve().parent
 IOU_THRESH = 0.5
-CONF = 0.5
+CONF = 0.8  # ล็อกตามอาจารย์ (ตรงกับ 03/04/06)
 
 
 def present_classes(lbl_dir: Path) -> list:

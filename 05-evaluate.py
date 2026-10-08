@@ -1,4 +1,4 @@
-"""สคริปต์ประเมินโมเดล best.pt รอบ 3 บนชุด test (ไม่เคยเห็นตอนเทรน).
+"""สคริปต์ประเมินโมเดล best.pt รอบ 6 บนชุด test (ไม่เคยเห็นตอนเทรน).
 
 รัน: .\\.env\\Scripts\\python.exe 05-evaluate.py
 ผล: ตาราง P / R / F1 / mAP50 / mAP50-95 รายคลาส + ตรวจผ่านเป้า + โชว์กราฟทีละภาพ
@@ -9,8 +9,8 @@ from ultralytics import YOLO
 import eval_utils as U
 
 BASE = Path(__file__).resolve().parent
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed3_fixed" / "weights" / "best.pt"
-DATA = BASE / "mixed2" / "data_local.yaml"
+WEIGHTS = BASE / "all_model" / "best_round6.pt"
+DATA = BASE / "mixed3" / "data_local.yaml"
 TARGET_MAP50 = 0.85
 
 if __name__ == "__main__":
@@ -21,7 +21,7 @@ if __name__ == "__main__":
     model = YOLO(str(WEIGHTS))
     m = model.val(data=str(DATA), split="test", imgsz=640)  # plots=True (default)
     b = m.box
-    present = U.present_classes(BASE / "mixed2" / "test" / "labels")
+    present = U.present_classes(BASE / "mixed3" / "test" / "labels")
 
     print(f"\n{'class':<24}{'P':>7}{'R':>7}{'F1':>7}{'mAP50':>8}{'mAP50-95':>10}")
     f1s = []
@@ -43,8 +43,8 @@ if __name__ == "__main__":
 
     print("\n🧮 สร้าง confusion matrix แบบ custom ...")
     cm = U.build_confusion_matrix(model, m.names,
-                                  BASE / "mixed2" / "test" / "images",
-                                  BASE / "mixed2" / "test" / "labels")
+                                  BASE / "mixed3" / "test" / "images",
+                                  BASE / "mixed3" / "test" / "labels")
     labels = [m.names[i] for i in range(len(m.names))] + ["background"]
     print("แถว=true / หลัก=pred (ช่อง background = ทายเกิน/หลุด):")
     print(f"{'':<24}{' '.join(f'{l[:6]:>7}' for l in labels)}")
@@ -56,5 +56,5 @@ if __name__ == "__main__":
     U.show_one_by_one(cm, labels,
                       [str(m.save_dir / p) for p in curves if (m.save_dir / p).exists()],
                       m.save_dir,
-                      f"Evaluate {WEIGHTS.parent.parent.name} "
+                      f"Evaluate {WEIGHTS.stem} "
                       f"(test mAP50={b.map50:.3f}, F1={mean_f1:.3f})")

@@ -10,7 +10,9 @@ runs/
 *.onnx
 
 # วิดีโอ + ภาพดิบ 1,322 ใบ (~749MB) ห้าม push — เก็บ local / external drive
-raw_images/
+# ยกเว้น RP_images (ภาพหลักฐานประกอบรีพอร์ต ต้อง push ให้รูปขึ้น)
+raw_images/*
+!raw_images/RP_images/
 *.mp4
 
 # pseudo-labels ดิบจากสคริปต์ (~152MB, ยังไม่ผ่าน review) — เก็บ local แล้วค่อย push ชุดที่คัดแล้ว
@@ -19,3 +21,14 @@ pseudo_for_roboflow.zip
 00001/
 # oversample ชั่วคราว (สร้างใหม่ได้ด้วย 02-train/oversample.py)
 mixed2_os/
+
+# ดาต้าเซ็ต Roboflow export (โหลดใหม่จาก universe ได้ — เก็บ local อย่างเดียว)
+# mixed2 ยัง track ไว้เหมือนเดิม, mixed3/4/5/6 + zip ไม่ต้อง push (รวม ~12000 ไฟล์ ~170MB)
+mixed3/
+mixed4/
+mixed5/
+mixed6/
+*.zip
+
+# โฟลเดอร์ weights ซ้ำกับ all_model (yolo26n.pt มีแล้ว) — ไม่ push
+weights/

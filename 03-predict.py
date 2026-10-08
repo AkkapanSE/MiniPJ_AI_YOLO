@@ -1,8 +1,13 @@
-"""สคริปต์ทดสอบโมเดล (inference) ด้วย best.pt รอบ 3 (mixed2 label แก้แล้ว, mAP50 0.895).
+"""สคริปต์ทดสอบโมเดล (inference) ด้วย best.pt รอบ 8 (mixed5 DTPG v5, test mAP50 0.935).
 
 วิธีใช้:
-    .\.env\Scripts\python.exe 03-predict.py                        # ทดสอบกับ mixed2/test/images
-    .\.env\Scripts\python.exe 03-predict.py <path-รูป/วิดีโอ/0>    # ทดสอบกับไฟล์หรือกล้อง (0 = webcam)
+    python 03-predict.py [source] [conf] [imgsz] [--w R] [--tta] [--iou X]
+      source : path รูป/โฟลเดอร์/วิดีโอ/0 (default: mixed5/test/images)
+      conf   : threshold (default 0.5 เน้นเรียกของครบ, 0.8 ตามกติกาครูถ้าต้องการ)
+      imgsz  : ขนาดภาพ (default 640, ลอง 960 กับของชิ้นใหญ่/close-up)
+      --w R  : เลือก weights รอบ R: 3/6/7/8 (default 8)
+      --tta  : เปิด test-time augmentation (flip+multiscale ช้าหน่อยแต่เรียกของกลับ)
+      --iou X: NMS IoU (default 0.7, ลดเหลือ 0.5 เพื่อยุบกล่องซ้อน)
 
 ผลลัพธ์: runs/detect/predict_demo/ (ภาพตีกรอบ + labels)
 """
@@ -11,27 +16,41 @@ from pathlib import Path
 from ultralytics import YOLO
 
 BASE = Path(__file__).resolve().parent
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed3_fixed" / "weights" / "best.pt"
 
-# โมเดลรอบ 3: yolov8n เทรนบน mixed2 label แก้แล้ว 80 epochs (train 713 / val mAP50 0.895 / test 0.879)
-# ถ้ายังไม่เคยเทรน ให้รัน 02-train/02-train.py ก่อน
+# โมเดลรอบ 8: fine-tune จาก best_round3 บน mixed5 80 epochs (train 1714 / test mAP50 0.935)
+# ถ้ายังไม่เคยเทรน ให้รัน 02-train/02-train-mixed5.py ก่อน
+
+ROUND_W = {"3": "best_round3.pt", "6": "best_round6.pt", "7": "best_round7.pt", "8": "best_round8_mixed5.pt"}
+
+
+def _arg(flag, default=None):
+    return sys.argv[sys.argv.index(flag) + 1] if flag in sys.argv else default
+
 
 if __name__ == "__main__":
-    assert WEIGHTS.exists(), f"ไม่พบ weights: {WEIGHTS} — รัน 02-train/02-train.py ก่อน"
+    pos = [a for a in sys.argv[1:] if not a.startswith("--")]
+    source = pos[0] if len(pos) > 0 else str(BASE / "mixed5" / "test" / "images")
+    conf = float(pos[1]) if len(pos) > 1 else 0.5   # default 0.5 เน้นเรียกของครบ 6 คลาส
+    imgsz = int(pos[2]) if len(pos) > 2 else 640
+    weights = BASE / "all_model" / ROUND_W.get(_arg("--w", "8"), ROUND_W["8"])
+    assert weights.exists(), f"ไม่พบ weights: {weights} — รัน 02-train/02-train.py ก่อน"
 
-    source = sys.argv[1] if len(sys.argv) > 1 else str(BASE / "mixed2" / "test" / "images")
-    print(f"🔍 ทดสอบโมเดล: {WEIGHTS.name} กับ {source}")
+    tta = "--tta" in sys.argv
+    iou = float(_arg("--iou", 0.7))
+    print(f"🔍 {weights.name} | {source} | conf={conf} imgsz={imgsz} tta={tta} iou={iou}")
 
-    model = YOLO(str(WEIGHTS))
+    model = YOLO(str(weights))
     # stream=True: ประมวลผลทีละภาพ ไม่เก็บผลทั้งหมดไว้ในแรม (กันแรมเต็ม)
     n_img, n_box = 0, 0
     for r in model.predict(
         source=source,
-        conf=0.5,          # มั่นใจ >= 50% ถึงตีกรอบ
-        imgsz=640,
-        save=True,         # เซฟภาพผลลัพธ์
-        save_txt=True,     # เซฟ label ที่ predict ได้
-        stream=True,       # สตรีมทีละภาพ ประหยัดแรม
+        conf=conf,
+        imgsz=imgsz,
+        augment=tta,     # TTA: flip + multiscale ช่วยของนอกโดเมน/สเกลเพี้ยน
+        iou=iou,         # NMS: ต่ำลง = ยุบกล่องซ้อนกันมากขึ้น
+        save=True,       # เซฟภาพผลลัพธ์
+        save_txt=True,   # เซฟ label ที่ predict ได้
+        stream=True,     # สตรีมทีละภาพ ประหยัดแรม
         project=str(BASE / "runs" / "detect"),
         name="predict_demo",
     ):

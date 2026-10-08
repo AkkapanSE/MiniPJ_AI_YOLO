@@ -20,7 +20,7 @@ RAW_DIRS = [BASE / "raw_images" / "brand1", BASE / "raw_images" / "street1"]
 MIXED = BASE / "mixed"
 OUT_IMG = BASE / "pseudo" / "images"
 OUT_LBL = BASE / "pseudo" / "labels"
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed_model" / "weights" / "best.pt"
+WEIGHTS = BASE / "all_model" / "best_round3.pt"
 CONF = 0.5
 IMGSZ = 640
 

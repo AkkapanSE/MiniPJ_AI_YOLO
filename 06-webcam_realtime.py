@@ -1,4 +1,4 @@
-"""สคริปต์ทดสอบโมเดล realtime ด้วย webcam ด้วย best.pt รอบ 3 (mixed2 label แก้แล้ว).
+"""สคริปต์ทดสอบโมเดล realtime ด้วย webcam ด้วย best.pt รอบ 9 (mixed6 DTPG v6, test mAP50 0.930).
 
 รัน: .\.env\Scripts\python.exe 06-webcam_realtime.py [เลขกล้อง]   (default 0)
 กด q เพื่อออกจากหน้าต่าง
@@ -9,7 +9,7 @@ import cv2
 from ultralytics import YOLO
 
 BASE = Path(__file__).resolve().parent
-WEIGHTS = BASE / "runs" / "detect" / "pathongko_mixed3_fixed" / "weights" / "best.pt"
+WEIGHTS = BASE / "all_model" / "best_round9_v6.pt"
 CONF = 0.5
 IMGSZ = 640
 
