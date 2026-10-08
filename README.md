@@ -2,14 +2,14 @@
 
 Brand vs Street Patongko Detection with YOLOv8
 
-โปรเจกต์ Mini Project ด้าน Artificial Intelligence และ Object Detection สำหรับตรวจจับและจำแนกปาท่องโก๋ด้วย YOLOv8
+Mini Project ด้าน Artificial Intelligence และ Object Detection สำหรับตรวจจับและจำแนกปาท่องโก๋ด้วย YOLOv8
 
-ระบบถูกออกแบบให้ตรวจจับปาท่องโก๋แต่ละชิ้นด้วย Bounding Box และจำแนกตาม 2 คุณลักษณะหลัก ได้แก่
+ระบบสามารถตรวจจับปาท่องโก๋แต่ละชิ้นด้วย Bounding Box และจำแนกตาม 2 คุณลักษณะหลัก ได้แก่
 
 * แหล่งที่มา: Brand / Street
 * สภาพรูปทรง: Good / Defect
 
-โมเดลเวอร์ชันปัจจุบันแบ่งออกเป็นทั้งหมด 4 Classes
+โมเดลเวอร์ชันปัจจุบันออกแบบให้จำแนกทั้งหมด 4 Classes
 
 Class	ความหมาย
 brand_good	ปาท่องโก๋แบรนด์ รูปทรงดี
@@ -21,7 +21,7 @@ street_defect	ปาท่องโก๋ร้านทั่วไป รู�
 
 📌 Project Overview
 
-กระบวนการพัฒนาโปรเจกต์เริ่มจากการถ่ายวิดีโอปาท่องโก๋จากสถานการณ์จริงจำนวน 2 คลิป จากนั้นนำมาสกัดเป็นภาพสำหรับสร้าง Dataset และ Label บน Roboflow ก่อนนำไป Train ด้วย YOLOv8
+กระบวนการพัฒนาเริ่มจากการถ่ายวิดีโอปาท่องโก๋จากสถานการณ์จริงจำนวน 2 คลิป จากนั้นนำมาสกัดเป็นภาพ ทำ Label บน Roboflow สร้าง Dataset และ Train ด้วย YOLOv8
 
 วิดีโอหน้าร้านจริง
         ↓
@@ -51,12 +51,12 @@ Predict Image / Video / Webcam
 
 🎯 วัตถุประสงค์
 
-1. สร้าง Dataset ปาท่องโก๋จากภาพและวิดีโอที่เก็บจากสถานการณ์จริง
+1. สร้าง Dataset ปาท่องโก๋จากภาพและวิดีโอจริง
 2. พัฒนาโมเดล YOLOv8 สำหรับตรวจจับและจำแนกปาท่องโก๋
-3. จำแนกปาท่องโก๋ระหว่าง ร้านแบรนด์ และ ร้านทั่วไป
-4. จำแนกรูปทรงของปาท่องโก๋เป็น Good และ Defect
+3. จำแนกปาท่องโก๋ระหว่าง Brand และ Street
+4. จำแนกรูปทรงเป็น Good และ Defect
 5. ประเมินโมเดลด้วย Precision, Recall, F1-score และ mAP
-6. ทดลองใช้งานโมเดลกับภาพนิ่ง วิดีโอ และ Webcam แบบ Real-time
+6. ทดลองใช้งานกับภาพนิ่ง วิดีโอ และ Webcam แบบ Real-time
 
 ⸻
 
@@ -76,11 +76,11 @@ raw_images/
 
 * ภาพดิบประมาณ 1,322 ภาพ
 * วิดีโอต้นฉบับ 2 ไฟล์
-* ขนาดข้อมูลรวมประมาณ 800 MB
+* ขนาดรวมประมาณ 800 MB
 
 raw_images/ เก็บไว้เฉพาะ Local และไม่ได้ Push ขึ้น Repository เนื่องจากมีขนาดไฟล์ค่อนข้างใหญ่
 
-Dataset ถูกแบ่งสำหรับการ Train เป็น
+Dataset แบ่งออกเป็น
 
 * Train
 * Validation
@@ -88,19 +88,26 @@ Dataset ถูกแบ่งสำหรับการ Train เป็น
 
 ⸻
 
-🖼️ การสกัดเฟรม
+🖼️ Frame Extraction
 
-รอบแรกสกัดภาพทุก 15 Frames
+การสกัดภาพแบ่งเป็น 2 รอบ
 
-รอบที่สองปรับเป็นทุก 10 Frames เพื่อเพิ่มจำนวนภาพ
+รอบที่ 1 : Save ทุก 15 Frames
+รอบที่ 2 : Save ทุก 10 Frames
+
+ภาพตัวอย่างจากการสกัดเฟรม
 
 ⸻
 
-🏷️ การ Label
+🏷️ Roboflow Labeling
 
-ทำ Bounding Box และกำหนด Class บน Roboflow
+ใช้ Roboflow สำหรับ
 
-ตัวอย่างสถิติ Dataset
+* สร้าง Bounding Box
+* กำหนด Class
+* ตรวจสอบ Label
+* แบ่ง Train / Validation / Test
+* Export Dataset สำหรับ YOLO
 
 ⸻
 
@@ -135,7 +142,7 @@ ID	Class	ประเภท	รูปทรง
 
 🔄 3. การปรับจาก 6 Classes เหลือ 4 Classes
 
-ในช่วงแรก Dataset ถูกออกแบบไว้ทั้งหมด 6 Classes
+ในช่วงแรก Dataset ถูกออกแบบเป็น 6 Classes
 
 brand_golden_defect
 brand_golden_good
@@ -144,16 +151,13 @@ street_burnt_good
 street_golden_defect
 street_golden_good
 
-แต่จากการทดลองพบว่าการแยก Golden และ Burnt ทำให้จำนวนข้อมูลในแต่ละ Class ไม่สมดุล โดยเฉพาะข้อมูลกลุ่มปาท่องโก๋ไหม้
+หลังจากทดลองพบว่าการแยก Golden และ Burnt ทำให้จำนวนข้อมูลในแต่ละ Class ไม่สมดุล โดยเฉพาะข้อมูลกลุ่มปาท่องโก๋ไหม้
 
-นอกจากนี้ บาง Class มีจำนวนข้อมูลน้อยมากหรือไม่มีข้อมูลเพียงพอใน Test Set ทำให้ประเมินโมเดลได้ไม่สมบูรณ์
+บาง Class มีตัวอย่างน้อยมาก และบาง Class ไม่มีข้อมูลเพียงพอใน Test Set ทำให้ประเมินผลได้ไม่สมบูรณ์
 
-จึงปรับโครงสร้างใหม่ให้เหลือ 4 Classes และให้โมเดลเน้นคุณลักษณะที่มีข้อมูลรองรับชัดเจนกว่า ได้แก่
+จึงปรับโครงสร้างใหม่ให้เหลือ 4 Classes
 
-1. Brand / Street
-2. Good / Defect
-
-การรวม Class เป็นดังนี้
+Class Mapping
 
 Class เดิม	Class ใหม่
 brand_golden_good	brand_good
@@ -163,9 +167,15 @@ street_burnt_good	street_good
 street_golden_defect	street_defect
 street_burnt_defect	street_defect
 
-ข้อดีของการปรับเป็น 4 Classes
+โมเดลจึงเน้นเพียง 2 คุณลักษณะหลัก
 
-* ลดความซับซ้อนของปัญหา
+Brand / Street
+      +
+Good / Defect
+
+ข้อดีของการปรับเหลือ 4 Classes
+
+* ลดความซับซ้อนในการจำแนก
 * ลดผลกระทบจาก Class Imbalance
 * เพิ่มจำนวนตัวอย่างต่อ Class
 * ลดความสับสนระหว่าง Golden และ Burnt
@@ -205,8 +215,6 @@ Webcam Real-time
 
 💻 5. Environment
 
-Environment ที่ใช้พัฒนาและ Train โมเดล
-
 Component	Version / Hardware
 Python	3.13
 PyTorch	CUDA 12.6 (cu126)
@@ -230,7 +238,7 @@ Image Processing	OpenCV
 Script	หน้าที่
 01-extract/_frames.py	สกัดภาพจากวิดีโอด้วย OpenCV
 02-train/02-train.py	Train โมเดล YOLOv8
-02-train/oversample.py	เพิ่มจำนวนข้อมูล Class ที่มีข้อมูลน้อย
+02-train/oversample.py	เพิ่มจำนวนข้อมูลของ Class ที่มีข้อมูลน้อย
 03-predict.py	ตรวจจับปาท่องโก๋จากภาพนิ่ง
 04-predict_video.py	ตรวจจับปาท่องโก๋จากวิดีโอ
 05-evaluate.py	ประเมินประสิทธิภาพโมเดล
@@ -243,8 +251,6 @@ eval_utils.py	Utility สำหรับการประเมินผล
 6.1 01-extract/_frames.py
 
 ใช้ OpenCV เปิดวิดีโอและสกัด Frame ออกมาเป็นภาพ
-
-การสกัดแบ่งเป็น 2 รอบ
 
 รอบที่ 1 : Save ทุก 15 Frames
 รอบที่ 2 : Save ทุก 10 Frames
@@ -268,7 +274,7 @@ copy_paste
 mixup
 patience = 20
 
-หลัง Train จะได้ Weight หลักคือ
+หลัง Train จะได้ Weight หลัก
 
 best.pt
 
@@ -276,13 +282,13 @@ best.pt
 
 6.3 02-train/oversample.py
 
-ใช้เพิ่มจำนวนตัวอย่างของ Class ที่มีข้อมูลน้อยใน Training Set
+ใช้สำหรับเพิ่มจำนวนข้อมูลของ Class ที่มีตัวอย่างน้อยใน Training Set
 
 วัตถุประสงค์หลักคือช่วยลดผลกระทบจาก
 
 Class Imbalance
 
-อย่างไรก็ตาม การ Oversample เป็นการนำข้อมูลเดิมกลับมาใช้ซ้ำ จึงไม่สามารถทดแทนการเก็บข้อมูลจริงใหม่ได้ทั้งหมด
+อย่างไรก็ตาม Oversampling เป็นการนำภาพเดิมกลับมาใช้ซ้ำ จึงไม่สามารถทดแทนการเก็บข้อมูลจริงใหม่ได้ทั้งหมด
 
 ⸻
 
@@ -290,19 +296,17 @@ Class Imbalance
 
 ใช้โมเดลที่ Train แล้วช่วยสร้าง Label เบื้องต้นให้ภาพที่ยังไม่มี Annotation
 
-กำหนด Confidence เบื้องต้นไว้ที่
+ค่าที่ใช้
 
 conf = 0.5
 
-หลังจากสร้าง Pseudo Label แล้วจะมีการตรวจสอบและแก้ไขด้วยคนอีกครั้ง ก่อนนำข้อมูลไปใช้ Train
+จากนั้นตรวจสอบและแก้ไข Label ด้วยคนอีกครั้งก่อนนำข้อมูลไปใช้ Training
 
 ⸻
 
 6.5 03-predict.py
 
 ใช้สำหรับตรวจจับปาท่องโก๋จากภาพนิ่ง
-
-รัน
 
 python 03-predict.py
 
@@ -322,7 +326,7 @@ python 03-predict.py path/to/image.jpg
 
 6.6 04-predict_video.py
 
-ใช้สำหรับตรวจจับจากวิดีโอ
+ใช้สำหรับตรวจจับปาท่องโก๋จากวิดีโอ
 
 python 04-predict_video.py path/to/video.mp4
 
@@ -330,7 +334,7 @@ python 04-predict_video.py path/to/video.mp4
 
 stream=True
 
-เพื่อประมวลผลวิดีโอทีละ Frame และช่วยลดการใช้ RAM
+เพื่อประมวลผลทีละ Frame และช่วยลดการใช้ RAM
 
 ⸻
 
@@ -356,7 +360,7 @@ Metrics ที่ใช้ประกอบด้วย
 
 6.8 06-webcam_realtime.py
 
-ใช้สำหรับตรวจจับปาท่องโก๋ผ่าน Webcam แบบ Real-time
+ใช้ตรวจจับปาท่องโก๋ผ่าน Webcam แบบ Real-time
 
 python 06-webcam_realtime.py
 
@@ -379,34 +383,34 @@ q
 4	YOLOv8s	Test mAP50 = 0.872
 5	Oversample + YOLOv8s, 100 Epochs	Test mAP50 = 0.878
 
-หมายเหตุ: ผลการทดลองข้างต้นเป็นผลจากขั้นตอนการพัฒนา Dataset ก่อนการปรับโครงสร้างสุดท้ายจาก 6 Classes เหลือ 4 Classes ดังนั้นเมื่อ Train Dataset แบบ 4 Classes ใหม่ ควรอัปเดตตารางนี้ด้วยผลจากโมเดลล่าสุด
+หมายเหตุ: ผลลัพธ์ส่วนนี้เป็นผลจากการทดลองก่อนปรับ Dataset รุ่นสุดท้ายจาก 6 Classes เหลือ 4 Classes ดังนั้นค่าของโมเดล 4 Classes รุ่นใหม่ควรถูกนำมาอัปเดตในส่วนนี้หลัง Train ใหม่
 
 ⸻
 
-🏆 8. Best Experiment
+🏆 8. Previous Best Experiment
 
-จากการทดลองเดิมทั้ง 5 รอบ รอบที่ให้ผลดีที่สุดคือ
+จากการทดลองเดิมทั้ง 5 รอบ โมเดลที่ให้ผลดีที่สุดคือ
 
-Model      : YOLOv8n
-Epochs     : 80
-Labels     : Fixed
-Round      : 3
+Model  : YOLOv8n
+Epochs : 80
+Labels : Fixed
+Round  : 3
 
-Validation
+Validation Results
 
 Metric	Result
 Precision	0.806
 Recall	0.896
 mAP50	0.895
 
-Test
+Test Results
 
 Metric	Result
 Precision	0.942
 Recall	0.857
 mAP50	0.879
 
-เป้าหมายของการทดลองคือ
+เป้าหมายของการทดลอง
 
 Test mAP50 > 0.85
 
@@ -414,7 +418,7 @@ Test mAP50 > 0.85
 
 Test mAP50 = 0.879
 
-ดังนั้นผลการทดลองเดิม
+ผลการทดลองเดิม
 
 ✅ PASS
 
@@ -434,19 +438,19 @@ Test mAP50 = 0.879
 
 ⚖️ 9. Model Weights
 
-Weight ของโมเดลที่ให้ผลดีที่สุดจากการทดลองเดิม
+Weight ของ Best Experiment เดิม
 
 runs/detect/pathongko_mixed3_fixed/weights/best.pt
 
 best.pt เก็บไว้เฉพาะ Local และไม่ได้ Push ขึ้น Repository
 
-เมื่อ Train Dataset 4 Classes ใหม่ ควรใช้ Weight ของโมเดลใหม่แทน Weight เดิมในส่วนนี้
+หลังจาก Train Dataset 4 Classes ใหม่ ควรเปลี่ยน Path นี้เป็น Weight ของโมเดลรุ่นล่าสุด
 
 ⸻
 
 🔍 10. Prediction Output
 
-โมเดล 4 Classes จะให้ผลลัพธ์ในรูปแบบ
+โมเดล 4 Classes จะให้ผลในรูปแบบ
 
 Class + Confidence
 
@@ -458,7 +462,7 @@ brand_good 0.93
 
 * ปาท่องโก๋จากร้านแบรนด์
 * รูปทรงดี
-* Confidence 93%
+* Confidence = 93%
 
 อีกตัวอย่าง
 
@@ -468,7 +472,7 @@ street_defect 0.94
 
 * ปาท่องโก๋จากร้านทั่วไป
 * รูปทรงชำรุด
-* Confidence 94%
+* Confidence = 94%
 
 ⸻
 
@@ -483,8 +487,6 @@ Video Detection
 ⸻
 
 ⚠️ 12. Limitations
-
-แม้ระบบจะสามารถตรวจจับและจำแนกปาท่องโก๋ได้ แต่ยังมีข้อจำกัดบางประการ
 
 12.1 Class Imbalance
 
@@ -502,7 +504,7 @@ No Detection
 
 12.4 Lighting Conditions
 
-สภาพแสงที่แตกต่างกัน เช่น
+สภาพแสงที่แตกต่างจาก Dataset เช่น
 
 * ภาพมืด
 * ภาพสว่างมาก
@@ -510,19 +512,19 @@ No Detection
 * เงาสะท้อน
 * แสงจากหลายทิศทาง
 
-อาจส่งผลต่อความแม่นยำของโมเดล
+อาจส่งผลต่อความแม่นยำ
 
 12.5 Good / Defect Definition
 
 การแบ่งระหว่าง Good และ Defect ขึ้นอยู่กับเกณฑ์การ Label ของผู้จัดทำ
 
-ดังนั้นควรกำหนดมาตรฐานการ Label ให้ชัดเจนและใช้เกณฑ์เดียวกันตลอด Dataset
+จึงควรกำหนดมาตรฐานการ Label ให้ชัดเจนและใช้เกณฑ์เดียวกันตลอด Dataset
 
 ⸻
 
 💡 13. Future Improvements
 
-แนวทางพัฒนาโปรเจกต์ต่อในอนาคต
+แนวทางพัฒนาต่อ
 
 1. เพิ่มจำนวนข้อมูลของทั้ง 4 Classes
 2. ทำจำนวนข้อมูลแต่ละ Class ให้สมดุลมากขึ้น
@@ -534,7 +536,7 @@ No Detection
 8. เพิ่ม Background ที่หลากหลาย
 9. ทดลอง Data Augmentation เพิ่มเติม
 10. ทดลอง Hyperparameter Tuning
-11. ทดสอบกับข้อมูลจากร้านที่ไม่เคยอยู่ใน Training Dataset
+11. ทดสอบกับร้านที่ไม่เคยอยู่ใน Training Dataset
 12. เพิ่มข้อมูลจริงแทนการ Oversample ภาพเดิม
 13. Train และ Evaluate Dataset 4 Classes ใหม่ทั้งหมด
 
@@ -544,20 +546,18 @@ No Detection
 
 เป้าหมาย	เกณฑ์	สถานะ
 สร้าง Dataset จากข้อมูลจริง	มี Train / Validation / Test	✅ สำเร็จ
-จำแนก Brand และ Street	ตรวจจับแหล่งที่มาได้	✅ สำเร็จ
-จำแนก Good และ Defect	แยกรูปทรงได้	✅ สำเร็จ
-ปรับโครงสร้างเหลือ 4 Classes	nc=4	✅ สำเร็จ
-Predict ภาพนิ่ง	ใช้งานผ่าน 03-predict.py	✅ สำเร็จ
-Predict วิดีโอ	ใช้งานผ่าน 04-predict_video.py	✅ สำเร็จ
-Webcam Real-time	ใช้งานผ่าน 06-webcam_realtime.py	✅ สำเร็จ
+จำแนก Brand / Street	จำแนกแหล่งที่มาได้	✅ สำเร็จ
+จำแนก Good / Defect	จำแนกรูปทรงได้	✅ สำเร็จ
+ปรับโครงสร้างเป็น 4 Classes	nc=4	✅ สำเร็จ
+Predict ภาพนิ่ง	03-predict.py	✅ สำเร็จ
+Predict วิดีโอ	04-predict_video.py	✅ สำเร็จ
+Webcam Real-time	06-webcam_realtime.py	✅ สำเร็จ
 Evaluate โมเดล	P / R / F1 / mAP	✅ มีระบบประเมิน
-Evaluate โมเดล 4 Classes รุ่นสุดท้าย	Train/Test ใหม่	🔄 ควรอัปเดตหลัง Train ใหม่
+Evaluate โมเดล 4 Classes รุ่นสุดท้าย	Train / Test ใหม่	🔄 รออัปเดต
 
 ⸻
 
 📚 15. Project Documents
-
-เอกสารเพิ่มเติมภายใน Repository
 
 File	Description
 report.md	รายงานโปรเจกต์ฉบับเต็ม
@@ -571,7 +571,7 @@ presentscript.md	บทพูดสำหรับนำเสนอ Mini Projec
 
 โปรเจกต์นี้พัฒนาระบบ YOLOv8 Object Detection สำหรับตรวจจับและจำแนกปาท่องโก๋จากข้อมูลจริง
 
-โครงสร้าง Class ปัจจุบันถูกปรับให้เหลือ 4 Classes
+โครงสร้าง Class ปัจจุบันถูกปรับให้เหลือทั้งหมด 4 Classes
 
 brand_defect
 brand_good
@@ -584,23 +584,41 @@ Brand / Street
       +
 Good / Defect
 
-การปรับจาก 6 Classes เหลือ 4 Classes ช่วยลดความซับซ้อนในการจำแนก ลดปัญหาจากข้อมูลกลุ่ม Burnt ที่มีจำนวนไม่เพียงพอ และทำให้โครงสร้าง Dataset เหมาะกับข้อมูลที่สามารถเก็บจากสถานการณ์จริงได้มากขึ้น
+การปรับจาก 6 Classes เหลือ 4 Classes ช่วยลดความซับซ้อนในการจำแนก ลดผลกระทบจากจำนวนข้อมูลกลุ่ม Burnt ที่มีไม่เพียงพอ และทำให้โครงสร้าง Dataset เหมาะกับข้อมูลจริงมากขึ้น
 
-จากการทดลองในช่วงก่อนปรับ Dataset รอบที่ดีที่สุดคือ YOLOv8n 80 Epochs + Fixed Labels ซึ่งทำ Test mAP50 ได้ 0.879 สูงกว่าเป้าหมายที่กำหนดไว้ที่ 0.85
+จากการทดลองก่อนปรับ Dataset รอบที่ให้ผลดีที่สุดคือ
 
-อย่างไรก็ตาม หลังจากเปลี่ยนโครงสร้าง Dataset เป็น 4 Classes ควร Train และ Evaluate โมเดลใหม่ เพื่อให้ค่า Precision, Recall, F1-score และ mAP สะท้อนประสิทธิภาพของโมเดล 4 Classes อย่างถูกต้อง
+YOLOv8n
+80 Epochs
+Fixed Labels
+Round 3
 
-แนวทางสำคัญในการพัฒนาต่อคือเพิ่มจำนวนและความหลากหลายของข้อมูลจริงจากหลายร้าน หลายมุมกล้อง หลายระยะ และหลายสภาพแสง เพื่อช่วยให้โมเดลสามารถนำไปใช้งานในสถานการณ์จริงได้ดีขึ้น
+โดยให้ผล
+
+Validation mAP50 = 0.895
+Test mAP50       = 0.879
+
+สูงกว่าเป้าหมาย
+
+mAP50 > 0.85
+
+อย่างไรก็ตาม ผลดังกล่าวเป็นผลจาก Dataset รุ่นก่อนหน้า
+
+หลังจากปรับโครงสร้างเป็น 4 Classes ควร Train และ Evaluate ใหม่ เพื่อให้ค่า Precision, Recall, F1-score และ mAP สะท้อนประสิทธิภาพของโมเดล 4 Classes อย่างถูกต้อง
+
+แนวทางสำคัญในการพัฒนาต่อคือเพิ่มจำนวนและความหลากหลายของข้อมูลจริงจากหลายร้าน หลายมุมกล้อง หลายระยะ และหลายสภาพแสง เพื่อเพิ่มความสามารถในการนำโมเดลไปใช้งานในสถานการณ์จริง
 
 ⸻
 
-📌 Current Class Configuration
+📌 Current Configuration
 
 Classes : 4
 0 : brand_defect
 1 : brand_good
 2 : street_defect
 3 : street_good
+
+⸻
 
 📌 Previous Best Experiment
 
@@ -612,4 +630,4 @@ Test mAP50 : 0.879
 Target     : > 0.850
 Result     : ✅ PASS
 
-ค่าด้านบนเป็นผลจากการทดลองก่อนปรับ Dataset เป็นโครงสร้าง 4 Classes และควรอัปเดตหลัง Train โมเดล 4 Classes รุ่นสุดท้าย
+ผลด้านบนเป็นผลจาก Dataset รุ่นก่อนปรับเป็น 4 Classes และควรอัปเดตด้วยผลจากโมเดล 4 Classes รุ่นสุดท้ายหลัง Train ใหม่
